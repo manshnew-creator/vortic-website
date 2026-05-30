@@ -1,73 +1,83 @@
-import IORedis from 'ioredis';
+import { TelemetryHub } from '../observability/telemetry';
 
 export class EdgeRedisCache {
-  private static client: IORedis | null = null;
+  private static restUrl = process.env.REDIS_REST_URL || '';
+  private static restToken = process.env.REDIS_REST_TOKEN || '';
   private static localFallback = new Map<string, { val: string; exp: number }>();
 
-  private static getClient(): IORedis | null {
-    if (this.client) return this.client;
-    
-    const redisUrl = process.env.REDIS_URL;
-    if (!redisUrl) {
-      console.warn('[Redis Cache] REDIS_URL not configured. Operating in high-performance local fallback mode.');
+  /**
+   * EDGE-NATIVE REST CLIENT (إصلاح خطأ الـ Webpack و ioredis على الـ Edge)
+   * 
+   * CRITICAL ARCHITECTURAL UPDATE:
+   * Next.js Edge Middleware runs in a restricted Edge runtime that lacks TCP socket support,
+   * meaning importing traditional TCP clients like 'ioredis' crashes the build (webpack unhandled schema error).
+   * 
+   * Solution: We implement a 100% Edge-Native REST Redis Client using standard Web 'fetch' APIs.
+   * Compatible with Upstash Redis REST API endpoints. Bypasses webpack bundling errors completely!
+   */
+  private static async executeRestCommand(command: string[]): Promise<any> {
+    if (!this.restUrl || !this.restToken) {
+      // Bypasses silently in local development fallback mode
       return null;
     }
 
     try {
-      this.client = new IORedis(redisUrl, {
-        maxRetriesPerRequest: 3,
-        connectTimeout: 5000,
-        lazyConnect: true,
+      const response = await fetch(`${this.restUrl}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.restToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(command),
       });
-      return this.client;
-    } catch (err) {
-      console.error('[Redis Cache] Connection initialization failed:', err);
+
+      if (!response.ok) {
+        throw new Error(`Upstash REST API rejected command with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.result; // Upstash returns the Redis outcome under the "result" property
+
+    } catch (err: any) {
+      console.warn('[Edge Redis Cache] REST call failed, falling back to memory:', err.message);
       return null;
     }
   }
 
   /**
-   * Resolves a key from the edge cache, checking global Redis or local edge-replica memory fallback
+   * Resolves a key from the global Edge Redis cache or local memory fallback
    */
   public static async get(key: string): Promise<string | null> {
-    const client = this.getClient();
-    
-    if (client) {
-      try {
-        return await client.get(key);
-      } catch (err) {
-        console.warn('[Redis Cache] Fetch failed, checking local edge fallback:', err);
-      }
+    // 1. Try REST call on the Edge
+    const result = await this.executeRestCommand(['GET', key]);
+    if (result !== null && result !== undefined) {
+      TelemetryHub.trackCachePerformance(key, true);
+      return result;
     }
 
-    // High performance local fallback checks
+    // 2. High performance local fallback check
     const cached = this.localFallback.get(key);
     if (cached) {
       if (cached.exp > Date.now()) {
+        TelemetryHub.trackCachePerformance(key, true);
         return cached.val;
       }
       this.localFallback.delete(key); // Evict expired
     }
 
+    TelemetryHub.trackCachePerformance(key, false);
     return null;
   }
 
   /**
-   * Sets a key in the distributed global cache with a Time-To-Live (TTL) limit
+   * Sets a key in the distributed global cache with a TTL limit
    */
   public static async set(key: string, value: string, ttlSeconds: number = 60): Promise<void> {
-    const client = this.getClient();
+    // 1. Try REST call on the Edge
+    const success = await this.executeRestCommand(['SET', key, value, 'EX', ttlSeconds.toString()]);
+    if (success) return;
 
-    if (client) {
-      try {
-        await client.set(key, value, 'EX', ttlSeconds);
-        return;
-      } catch (err) {
-        console.warn('[Redis Cache] Write failed, falling back to local memory:', err);
-      }
-    }
-
-    // High performance local fallback writes
+    // 2. High performance local fallback write
     this.localFallback.set(key, {
       val: value,
       exp: Date.now() + ttlSeconds * 1000,
@@ -75,17 +85,10 @@ export class EdgeRedisCache {
   }
 
   /**
-   * Invalidates / clears a key (essential for on-demand ISR revalidation triggers on publish)
+   * Invalidates / clears a key (essential for on-demand ISR revalidation triggers)
    */
   public static async invalidate(key: string): Promise<void> {
-    const client = this.getClient();
-    if (client) {
-      try {
-        await client.del(key);
-      } catch (err) {
-        console.warn('[Redis Cache] Invalidation failed:', err);
-      }
-    }
+    await this.executeRestCommand(['DEL', key]);
     this.localFallback.delete(key);
   }
 }
