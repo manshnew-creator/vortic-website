@@ -14,7 +14,7 @@ export default async function middleware(req: NextRequest) {
   const url = req.nextUrl;
   const hostname = req.headers.get('host') || 'vortic.website';
 
-  // 1. UNIFIED SINGLE-DOMAIN ARCHITECTURE BYPASS (Vortic.website)
+  // 1. UNIFIED SINGLE-DOMAIN ARCHITECTURE BYPASS (Vortic.website & Vercel Previews)
   // These are the main platform routes. Requests to these domains bypass the multi-tenant rewrites
   // and serve the main marketing site, builder workspace, and admin dashboard.
   const appDomains = [
@@ -27,8 +27,12 @@ export default async function middleware(req: NextRequest) {
   const searchParams = url.searchParams.toString();
   const path = `${url.pathname}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
 
+  // Automatically bypass Next.js multi-tenant rewrites for Vercel preview domains (Issue Resolution)
+  // E.g. vortic-ten.vercel.app or any git-branched preview domain
+  const isVercelDomain = hostname.endsWith('.vercel.app');
   const isAppDomain = appDomains.some((domain) => hostname === domain);
-  if (isAppDomain) {
+
+  if (isAppDomain || isVercelDomain) {
     // Let the main SaaS application render natively (Frictionless Onboarding & Builder Canvas)
     return NextResponse.next();
   }
