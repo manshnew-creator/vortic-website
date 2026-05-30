@@ -1,3 +1,5 @@
+'use client'; // ENFORCE CLIENT RUNTIME ON NEXT.JS 15 (RSC Resolution)
+
 import React, { useState } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { ResponsiveValue } from '../../types/builder';
@@ -21,7 +23,7 @@ export const RightPanel: React.FC = () => {
 
   if (!schema || !selectedBlockId) {
     return (
-      <div className="w-80 border-l border-gray-200 bg-white h-full flex items-center justify-center p-6 text-center select-none">
+      <div className="w-80 border-l border-gray-200 bg-white h-full flex items-center justify-center p-6 text-center select-none text-slate-800">
         <div className="text-gray-400">
           <span className="text-3xl block mb-2">👈</span>
           <p className="text-xs">Select any element on the Canvas to configure properties and styles.</p>
@@ -50,7 +52,7 @@ export const RightPanel: React.FC = () => {
   };
 
   return (
-    <div className="w-80 border-l border-gray-200 bg-white h-full flex flex-col select-none text-xs text-gray-700">
+    <div className="w-80 border-l border-gray-200 bg-white h-full flex flex-col select-none text-xs text-slate-700">
       {/* Block Header Information */}
       <div className="p-4 border-b border-gray-200 bg-gray-50/50">
         <div className="flex justify-between items-center mb-1">
@@ -108,7 +110,7 @@ export const RightPanel: React.FC = () => {
                     type="text"
                     value={block.props.text || ''}
                     onChange={(e) => updateBlockProps(block.id, { text: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -116,7 +118,7 @@ export const RightPanel: React.FC = () => {
                   <select
                     value={block.props.level || 2}
                     onChange={(e) => updateBlockProps(block.id, { level: parseInt(e.target.value) })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   >
                     {[1, 2, 3, 4, 5, 6].map((l) => (
                       <option key={l} value={l}>H{l}</option>
@@ -133,7 +135,7 @@ export const RightPanel: React.FC = () => {
                   rows={8}
                   value={block.props.htmlContent || ''}
                   onChange={(e) => updateBlockProps(block.id, { htmlContent: e.target.value })}
-                  className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono text-[10px]"
+                  className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono text-[10px] bg-white text-slate-800"
                 />
               </div>
             )}
@@ -146,7 +148,7 @@ export const RightPanel: React.FC = () => {
                     type="text"
                     value={block.props.label || ''}
                     onChange={(e) => updateBlockProps(block.id, { label: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -154,7 +156,7 @@ export const RightPanel: React.FC = () => {
                   <select
                     value={block.props.variant || 'primary'}
                     onChange={(e) => updateBlockProps(block.id, { variant: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   >
                     <option value="primary">Primary Solid</option>
                     <option value="secondary">Secondary Light</option>
@@ -165,7 +167,7 @@ export const RightPanel: React.FC = () => {
                 </div>
                 <div className="border-t border-gray-100 pt-3">
                   <span className="block text-[11px] font-bold text-gray-700 mb-2">Interactivity Action</span>
-                  <div className="space-y-2 bg-gray-50 p-2.5 rounded border border-gray-100">
+                  <div className="space-y-2 bg-gray-50 p-2.5 rounded border border-gray-100 text-slate-800">
                     <div>
                       <label className="block text-[9px] font-semibold text-gray-500 uppercase">Action Type</label>
                       <select
@@ -175,7 +177,7 @@ export const RightPanel: React.FC = () => {
                             action: { ...block.props.action, type: e.target.value },
                           })
                         }
-                        className="w-full px-1.5 py-1 border border-gray-200 rounded text-[11px] bg-white mt-1"
+                        className="w-full px-1.5 py-1 border border-gray-200 rounded text-[11px] bg-white mt-1 text-slate-800"
                       >
                         <option value="none">No Action</option>
                         <option value="url">External Link (URL)</option>
@@ -195,7 +197,7 @@ export const RightPanel: React.FC = () => {
                               action: { ...block.props.action, url: e.target.value },
                             })
                           }
-                          className="w-full px-2 py-1 border border-gray-200 rounded text-[11px] mt-1"
+                          className="w-full px-2 py-1 border border-gray-200 rounded text-[11px] mt-1 bg-white text-slate-800"
                         />
                       </div>
                     )}
@@ -211,7 +213,7 @@ export const RightPanel: React.FC = () => {
                               action: { ...block.props.action, anchorId: e.target.value },
                             })
                           }
-                          className="w-full px-2 py-1 border border-gray-200 rounded text-[11px] mt-1"
+                          className="w-full px-2 py-1 border border-gray-200 rounded text-[11px] mt-1 bg-white text-slate-800"
                         />
                       </div>
                     )}
@@ -228,7 +230,7 @@ export const RightPanel: React.FC = () => {
                     type="text"
                     value={block.props.src || ''}
                     onChange={(e) => updateBlockProps(block.id, { src: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -237,7 +239,7 @@ export const RightPanel: React.FC = () => {
                     type="text"
                     value={block.props.alt || ''}
                     onChange={(e) => updateBlockProps(block.id, { alt: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   />
                 </div>
               </>
@@ -250,7 +252,7 @@ export const RightPanel: React.FC = () => {
                   <select
                     value={block.props.provider || 'youtube'}
                     onChange={(e) => updateBlockProps(block.id, { provider: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   >
                     <option value="youtube">YouTube Embed</option>
                     <option value="html5">Direct HTML5 MP4</option>
@@ -262,10 +264,10 @@ export const RightPanel: React.FC = () => {
                     type="text"
                     value={block.props.url || ''}
                     onChange={(e) => updateBlockProps(block.id, { url: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-2 bg-gray-50 p-2 rounded">
+                <div className="grid grid-cols-2 gap-2 bg-gray-50 p-2 rounded text-slate-800">
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -301,7 +303,7 @@ export const RightPanel: React.FC = () => {
                   <select
                     value={block.props.submitMethod || 'SUPABASE'}
                     onChange={(e) => updateBlockProps(block.id, { submitMethod: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   >
                     <option value="SUPABASE">Supabase DB Leads Collection</option>
                     <option value="POST">API Endpoint (POST)</option>
@@ -315,7 +317,7 @@ export const RightPanel: React.FC = () => {
                       placeholder="https://domain.com/api/forms/..."
                       value={block.props.actionUrl || ''}
                       onChange={(e) => updateBlockProps(block.id, { actionUrl: e.target.value })}
-                      className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                      className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                     />
                   </div>
                 )}
@@ -325,7 +327,7 @@ export const RightPanel: React.FC = () => {
                     type="text"
                     value={block.props.successMessage || ''}
                     onChange={(e) => updateBlockProps(block.id, { successMessage: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
                   />
                 </div>
               </>
@@ -356,7 +358,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockTypography(block.id, { fontSize: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -372,7 +374,7 @@ export const RightPanel: React.FC = () => {
                       type="text"
                       value={block.typography?.color || '#000000'}
                       onChange={(e) => updateBlockTypography(block.id, { color: e.target.value })}
-                      className="w-full px-1.5 py-0.5 border border-gray-200 rounded text-[10px]"
+                      className="w-full px-1.5 py-0.5 border border-gray-200 rounded text-[10px] bg-white text-slate-800"
                     />
                   </div>
                 </div>
@@ -387,7 +389,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockTypography(block.id, { fontWeight: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -399,7 +401,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockTypography(block.id, { textAlign: val })
                       )
                     }
-                    className="w-full px-1.5 py-1 border border-gray-200 rounded bg-white"
+                    className="w-full px-1.5 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   >
                     <option value="">Default</option>
                     <option value="left">Left</option>
@@ -424,7 +426,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockLayout(block.id, { display: val })
                       )
                     }
-                    className="w-full px-1.5 py-1 border border-gray-200 rounded bg-white"
+                    className="w-full px-1.5 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   >
                     <option value="block">Block</option>
                     <option value="flex">Flexbox</option>
@@ -439,7 +441,7 @@ export const RightPanel: React.FC = () => {
                     placeholder="e.g. #f3f4f6"
                     value={block.layout?.backgroundColor || ''}
                     onChange={(e) => updateBlockLayout(block.id, { backgroundColor: e.target.value })}
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -453,7 +455,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockLayout(block.id, { width: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -467,7 +469,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockLayout(block.id, { minHeight: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
               </div>
@@ -488,7 +490,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockSpacing(block.id, { paddingTop: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -502,7 +504,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockSpacing(block.id, { paddingBottom: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -516,7 +518,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockSpacing(block.id, { marginTop: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
                 <div>
@@ -530,7 +532,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockSpacing(block.id, { marginBottom: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
               </div>
@@ -545,7 +547,7 @@ export const RightPanel: React.FC = () => {
                   <select
                     value={block.border?.borderStyle || 'none'}
                     onChange={(e) => updateBlockBorder(block.id, { borderStyle: e.target.value as any })}
-                    className="w-full px-1.5 py-1 border border-gray-200 rounded bg-white"
+                    className="w-full px-1.5 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   >
                     <option value="none">None</option>
                     <option value="solid">Solid</option>
@@ -564,7 +566,7 @@ export const RightPanel: React.FC = () => {
                         updateBlockBorder(block.id, { borderRadius: val })
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-200 rounded"
+                    className="w-full px-2 py-1 border border-gray-200 rounded bg-white text-slate-800"
                   />
                 </div>
               </div>
@@ -578,7 +580,7 @@ export const RightPanel: React.FC = () => {
             <span className="block font-bold text-[11px] text-gray-600 mb-1">Responsive View Rules</span>
             <p className="text-[10px] text-gray-400 mb-3 leading-snug">Toggle which viewport width scales render this element block configuration in production.</p>
 
-            <div className="space-y-3 bg-gray-50 p-3 rounded border border-gray-100">
+            <div className="space-y-3 bg-gray-50 p-3 rounded border border-gray-100 text-slate-800">
               <label className="flex items-center justify-between">
                 <span className="font-medium text-gray-700">Show on Desktop</span>
                 <input

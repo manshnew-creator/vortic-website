@@ -1,3 +1,5 @@
+'use client'; // ENFORCE CLIENT RUNTIME ON NEXT.JS 15 (RSC Resolution)
+
 import React, { useState } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { BaseBlock, BlockType } from '../../types/builder';
@@ -148,7 +150,7 @@ export const LeftSidebar: React.FC = () => {
   });
 
   return (
-    <div className="w-80 border-r border-gray-200 bg-white h-full flex flex-col select-none">
+    <div className="w-80 border-r border-gray-200 bg-white h-full flex flex-col select-none text-slate-800">
       {/* Search Header */}
       <div className="p-4 border-b border-gray-200">
         <h2 className="text-sm font-semibold text-gray-700 mb-3">Add Elements</h2>
@@ -158,7 +160,7 @@ export const LeftSidebar: React.FC = () => {
             placeholder="Search blocks..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 pl-8"
+            className="w-full text-xs px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 pl-8 bg-white"
           />
           <span className="absolute left-2.5 top-2.5 text-gray-400 text-xs">🔍</span>
         </div>
@@ -192,7 +194,7 @@ export const LeftSidebar: React.FC = () => {
             <div className="text-2xl mr-3 bg-gray-50 p-2 rounded-md group-hover:bg-blue-50 transition-colors">
               {item.icon}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-left">
               <h3 className="text-xs font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
                 {item.name}
               </h3>

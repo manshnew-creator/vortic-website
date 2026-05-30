@@ -1,3 +1,5 @@
+'use client'; // ENFORCE CLIENT RUNTIME ON NEXT.JS 15 (RSC Resolution)
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { VisualLayoutEngine, BoundingBox, SnapGuide } from '../../lib/editor/layoutEngine';

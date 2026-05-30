@@ -14,10 +14,13 @@
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",
+    "autoprefixer": "^10.4.16",
     "ioredis": "^5.3.2",
     "next": "^15.0.0",
+    "postcss": "^8.4.31",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tailwindcss": "^3.4.1",
     "ua-parser-js": "^1.0.37",
     "zustand": "^4.5.1"
   },

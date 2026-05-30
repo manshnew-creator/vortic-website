@@ -1,3 +1,5 @@
+'use client'; // ENFORCE CLIENT RUNTIME ON NEXT.JS 15 (RSC Resolution)
+
 import React from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { BlockRenderer } from '../renderer/BlockRenderer';
@@ -31,7 +33,7 @@ export const Canvas: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col bg-[#f3f4f6] overflow-hidden select-none">
       {/* Viewport Control Bar */}
-      <div className="h-12 border-b border-gray-200 bg-white flex items-center justify-between px-6 z-10">
+      <div className="h-12 border-b border-gray-200 bg-white flex items-center justify-between px-6 z-10 text-slate-800">
         <div className="flex items-center space-x-1">
           <button
             onClick={() => setViewportMode('desktop')}
