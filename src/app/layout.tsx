@@ -1,4 +1,5 @@
 import React from 'react';
+import './globals.css'; // IMPORT TAILWIND GLOBALS CSS (Issue Resolution)
 
 export const metadata = {
   title: 'Vortic.website | The Website Operating System',
@@ -9,7 +10,6 @@ export const metadata = {
  * NEXT.JS ROOT LAYOUT (صمام الأمان لـ Vercel Build)
  * 
  * Critical Next.js App Router Requirement:
- * Resolves the fatal Vercel build error "page.tsx doesn't have a root layout."
  * Declares the global HTML wrapper, document head, and body rendering context.
  */
 export default function RootLayout({

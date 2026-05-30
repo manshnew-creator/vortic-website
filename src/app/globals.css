@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Additional global smooth animations and typography configurations */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #030712; /* Fallback deep slate */
+  color: #f3f4f6;
+  margin: 0;
+  padding: 0;
+}
