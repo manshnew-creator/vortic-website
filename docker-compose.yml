@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Next.js SaaS Builder Application Container (Production Hardened)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: saas-builder-app
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    depends_on:
+      - db
+      - redis
+
+  # PostgreSQL Database Container
+  db:
+    image: postgres:15-alpine
+    container_name: saas-postgres-db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mySecurePassword}
+      - POSTGRES_DB=saas_builder
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  # Redis Cache & Analytics queue container
+  redis:
+    image: redis:7-alpine
+    container_name: saas-redis-cache
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  redisdata:

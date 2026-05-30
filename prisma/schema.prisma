@@ -1,0 +1,186 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  INCOMPLETE
+  TRIALING
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  UNPUBLISHED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  FAILED
+}
+
+model UserProfile {
+  id                 String             @id @default(uuid()) // Links to Supabase Auth User ID
+  email              String             @unique
+  plan               Plan               @default(FREE)
+  subscriptionStatus SubscriptionStatus @default(ACTIVE)
+  subscriptionId     String?            @unique
+  currentPeriodEnd   DateTime?
+  usageStorageBytes  BigInt             @default(0)
+  usageWebsiteCount  Int                @default(0)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  websites           Website[]
+  assets             Asset[]
+
+  @@index([email])
+}
+
+model Website {
+  id               String        @id @default(uuid())
+  name             String
+  subdomain        String        @unique
+  customDomain     String?       @unique
+  themeConfig      Json          // Spacing, default colors, typography settings
+  publishStatus    PublishStatus @default(DRAFT)
+  favicon          String?
+  seoTitle         String?
+  seoDescription   String?
+  seoKeywords      String?
+  ogImage          String?
+  userId           String
+  user             UserProfile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  pages            Page[]
+  domainConfigs    DomainConfig[]
+  analyticsRecords AnalyticsRecord[]
+  blocks           GlobalBlock[]
+
+  @@index([userId])
+  @@index([subdomain])
+  @@index([customDomain])
+}
+
+model Page {
+  id             String        @id @default(uuid())
+  websiteId      String
+  website        Website       @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  title          String
+  slug           String
+  content        Json          // Storing the strongly typed JSON Page Builder Schema
+  publishedContent Json?       // Storing the published version of the JSON Page Builder Schema
+  publishStatus  PublishStatus @default(DRAFT)
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+  ogImage        String?
+  
+  // OPTIMISTIC LOCKING: Prevents concurrent edit overrides (Problem #6)
+  version        Int           @default(1)
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  versions       PageVersion[]
+
+  @@unique([websiteId, slug])
+  @@index([websiteId])
+}
+
+model PageVersion {
+  id        String   @id @default(uuid())
+  pageId    String
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  content   Json
+  version   Int
+  createdBy String
+  createdAt DateTime @default(now())
+
+  @@index([pageId])
+}
+
+model GlobalBlock {
+  id        String   @id @default(uuid())
+  websiteId String
+  website   Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  name      String
+  category  String
+  content   Json     // Holds block schema
+  isGlobal  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([websiteId])
+}
+
+model DomainConfig {
+  id                 String             @id @default(uuid())
+  websiteId          String
+  website            Website            @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  domainName         String             @unique
+  verificationToken  String
+  verificationStatus VerificationStatus @default(PENDING)
+  sslStatus          VerificationStatus @default(PENDING)
+  sslConfiguredAt    DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([websiteId])
+  @@index([domainName])
+}
+
+model AnalyticsRecord {
+  id            String   @id @default(uuid())
+  websiteId     String
+  website       Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  pageSlug      String
+  visitorId     String
+  userAgent     String?
+  deviceType    String?  // Desktop, Tablet, Mobile
+  browser       String?
+  os            String?
+  country       String?
+  referrer      String?
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
+  eventType     String   @default("PAGE_VIEW") // PAGE_VIEW, CLICK, CONVERSION
+  eventMetadata Json?    // Interactive tracking (CTR, Click cords, IDs)
+  createdAt     DateTime @default(now())
+
+  @@index([websiteId])
+  @@index([createdAt])
+  @@index([websiteId, pageSlug])
+}
+
+model Asset {
+  id         String      @id @default(uuid())
+  userId     String
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName   String
+  fileSize   Int
+  mimeType   String
+  url        String
+  publicId   String
+  createdAt  DateTime    @default(now())
+
+  @@index([userId])
+}

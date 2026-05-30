@@ -1,0 +1,65 @@
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '../../../../lib/db/prisma';
+import { DistributedRateLimiter } from '../../../../lib/security/rateLimit';
+import { HoneypotSpamFilter } from '../../../../lib/security/honeypot';
+
+export async function POST(req: NextRequest) {
+  try {
+    // 1. Rate limiting protection (Anti-Spam Filter) via Distributed Redis limiter (Problem #5)
+    const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+    if (!await DistributedRateLimiter.isAllowed(ip)) {
+      return NextResponse.json({ error: 'Too many submissions. Please wait 1 minute.' }, { status: 429 });
+    }
+
+    const body = await req.json();
+    const { formId, data } = body;
+
+    if (!formId || !data) {
+      return NextResponse.json({ error: 'Missing required parameters: formId or data payload.' }, { status: 400 });
+    }
+
+    // 2. Honeypot Spam Protection
+    if (HoneypotSpamFilter.isSpamSubmission(data)) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Spam submission detected and rejected.' 
+      }, { status: 400 });
+    }
+
+    // 3. Dynamic block lookup to identify website ID
+    const block = await prisma.globalBlock.findFirst({
+      where: { id: formId }
+    });
+
+    const websiteId = block ? block.websiteId : 'website_demo_1';
+
+    // 4. Secure leads capture and conversion logging via centralized Prisma singleton
+    const conversionRecord = await prisma.analyticsRecord.create({
+      data: {
+        websiteId: websiteId,
+        pageSlug: 'home',
+        visitorId: data.visitorId || 'anonymous_lead',
+        userAgent: req.headers.get('user-agent') || 'Unknown',
+        eventType: 'CONVERSION',
+        eventMetadata: {
+          formId,
+          submittedFields: data,
+          capturedAt: new Date().toISOString(),
+        }
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Lead captured successfully and registered in the conversion funnel database.',
+      leadId: conversionRecord.id,
+    });
+
+  } catch (error: any) {
+    console.error('[Forms Ingestion API Route Error]', error);
+    return NextResponse.json({ 
+      error: 'Failed to ingest lead submission.', 
+      details: error.message 
+    }, { status: 500 });
+  }
+}
