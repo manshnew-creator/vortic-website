@@ -2,11 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Additional global smooth animations and typography configurations */
+/* Custom system-wide scrollbars and smooth visual polish */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #030712; /* Fallback deep slate */
+  background-color: #030712; /* Deep slate dark */
   color: #f3f4f6;
   margin: 0;
   padding: 0;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
 }
