@@ -5,7 +5,7 @@ import { AssetGraphResolver } from './lib/publishing/assetGraph';
 import { IncrementalGraphCompiler } from './lib/publishing/incrementalCompiler';
 import { EdgeDistributedRouter } from './lib/cache/edgeRouter';
 import { TelemetryHub } from './lib/observability/telemetry';
-import { DurableWorkflowEngine } from './lib/publishing/durableWorkflow';
+
 
 /**
  * 🚀 UNICORN-GRADE SaaS PLATFORM PLAYGROUND (ملعب المحاكاة التكاملي الشامل)
@@ -18,7 +18,6 @@ import { DurableWorkflowEngine } from './lib/publishing/durableWorkflow';
  * 3. [Asset Dependency Graph]: Traces images, preconnects Google Fonts, and structures preloads.
  * 4. [Incremental Compiler]: Performs delta compilation on dirty node ASTs.
  * 5. [Edge Serving Router]: Simulates ultra-low latency Edge KV serving with CDN revalidation headers.
- * 6. [Durable Event-Sourced Workflow]: Orchestrates resilient, resumable step-by-step deploy flows.
  * 7. [OpenTelemetry Hub]: Captures tracing metrics and performance logs.
  */
 async function runUnicornPlayground() {
@@ -156,10 +155,7 @@ async function runUnicornPlayground() {
   console.log(`📄 Compiled HTML footprint: ${compileReport.html.substring(0, 150)}...\n`);
 
   // ==================================================================
-  // STEP 5: STATEFUL EVENT-SOURCED DURABLE WORKFLOW ORCHESTRATOR DEMO
   // ==================================================================
-  console.log('🔄 [5. Durable Workflow] Orchestrating resilient deploy pipeline workflow steps...');
-  const workflowId = 'wf_deploy_run_01';
 
   const steps = [
     {
@@ -185,11 +181,10 @@ async function runUnicornPlayground() {
     }
   ];
 
-  const workflowResult = await DurableWorkflowEngine.executeDurable(workflowId, 'landing_page_demo_1', steps);
   console.log(`✅ Deploy Workflow Status: ${workflowResult.status} (Last Completed Step Index: ${workflowResult.lastCompletedStepIndex})\n`);
 
   // ==================================================================
-  // STEP 6: EDGE SERVIGN ROUTER LOOKUP DEMO
+  // STEP 5: EDGE SERVIGN ROUTER LOOKUP DEMO
   // ==================================================================
   console.log('📡 [6. Edge serving] Resolving incoming domain tenant from Global Edge KV...');
   // Simulate publishing page schema to global Edge KV
@@ -207,7 +202,7 @@ async function runUnicornPlayground() {
   console.log(`Serving node location: ${mockResponse.headers.get('X-Edge-Node-Location')}\n`);
 
   // ==================================================================
-  // STEP 7: OPENTELEMETRY TRACING LOGGING DEMO
+  // STEP 6: OPENTELEMETRY TRACING LOGGING DEMO
   // ==================================================================
   console.log('📊 [7. Observability Telemetry] Flushing metrics buffer logs to Grafana...');
   TelemetryHub.trackEvent('PLAYGROUND_RUN_LOOP_SUCCESSFUL', { durationMs: 250 });

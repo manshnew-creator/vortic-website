@@ -12,10 +12,15 @@ export const appendSecurityHeaders = (response: NextResponse): NextResponse => {
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   
-  // CORS configuration
-  response.headers.set('Access-Control-Allow-Origin', '*');
+  // CORS configuration - Restrict to trusted origins only (FIXED)
+  const allowedOrigin = process.env.NEXT_PUBLIC_ROOT_DOMAIN 
+    ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` 
+    : 'https://vortic.website';
+
+  response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
 
   // CSP configurations: Strict script, style, image sources
   const cspHeader = `

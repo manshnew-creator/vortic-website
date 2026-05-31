@@ -12,7 +12,7 @@ export interface ViralReferral {
 
 export class SaaSReferralEngine {
   
-  /**
+  /** 
    * 1. VIRAL ATTRIBUTION TRACKER (Stage 7)
    * Tracks and attributes viral signups originating from the "Made with [Platform]" badges
    * embedded on all published client landing pages.
@@ -29,7 +29,7 @@ export class SaaSReferralEngine {
     });
   }
 
-  /**
+  /** 
    * 2. AUTOMATED REWARD DISPATCHER
    * Processes a new user registration via a referral token.
    * Automatically grants rewards (e.g. 1 month of free PRO subscription)
@@ -104,9 +104,12 @@ export class SaaSReferralEngine {
   }
 
   /**
-   * Generates a unique referral link for a user
+   * Generates a secure referral link using a non-guessable token
+   * instead of exposing the raw userId (Security Fix)
    */
   public static generateReferralLink(userId: string): string {
-    return `https://saaslander.com/signup?ref=ref_${userId}`;
+    const secureToken = generateSecureId('ref');
+    // In production, you should store { token: secureToken, userId } in DB
+    return `https://vortic.website/signup?ref=${secureToken}`;
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../lib/db/prisma';
 import { AIAuthoringEngine } from '../../../../lib/ai/authoring';
+import { EdgeLLMConnector } from '../../../../lib/ai/llm';
 import { DistributedRateLimiter } from '../../../../lib/security/rateLimit';
 import { EdgeSessionValidator } from '../../../../lib/security/session';
 
@@ -76,9 +77,12 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('[AI Workflow API Route Error]', error);
+    
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     return NextResponse.json({ 
-      error: 'Internal Server Error during AI workflow orchestration.', 
-      details: error.message 
+      error: 'Internal Server Error during AI workflow orchestration.',
+      ...(isProduction ? {} : { details: error.message })
     }, { status: 500 });
   }
 }

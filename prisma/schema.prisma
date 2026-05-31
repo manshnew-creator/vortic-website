@@ -184,3 +184,4 @@ model Asset {
 
   @@index([userId])
 }
+model Lead { id String @id @default(uuid()) websiteId String website Website @relation(fields: [websiteId], references: [id], onDelete: Cascade) pageSlug String? name String? email String phone String? message String? formData Json? source String? createdAt DateTime @default(now()) @@index([websiteId]) @@index([email]) }

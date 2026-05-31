@@ -36,7 +36,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   isEditorMode = false,
 }) => {
   const block = schema.blocks[blockId];
-  const { viewportMode, updateBlockLayout, moveBlock, duplicateBlock, deleteBlock } = useEditorStore();
+"  // Only load editor store when in editor mode (Performance Fix)&#10;  const editorStore = isEditorMode ? useEditorStore() : null;&#10;  const viewportMode = editorStore?.viewportMode || 'desktop';&#10;  const updateBlockLayout = editorStore?.updateBlockLayout;&#10;  const moveBlock = editorStore?.moveBlock;&#10;  const duplicateBlock = editorStore?.duplicateBlock;&#10;  const deleteBlock = editorStore?.deleteBlock;"
   if (!block) return null;
 
   // Enforce visibility rules inside preview/published sites

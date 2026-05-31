@@ -36,7 +36,7 @@ export class EdgeNativeCompiler {
         <title>${schema.seo.title || schema.title}</title>
         <meta name="description" content="${schema.seo.description || ''}">
         <meta name="keywords" content="${schema.seo.keywords || ''}">
-        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Tailwind CDN removed -->
         <style>${compiledCss}</style>
       </head>
       <body class="bg-white text-gray-900">

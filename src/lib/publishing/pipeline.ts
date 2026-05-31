@@ -105,7 +105,7 @@ export class PublishingPipeline {
         <meta property="og:description" content="${seoMeta.description}">
         <meta property="og:image" content="${seoMeta.ogImage}">
         ${preloadTagsHtml}
-        <script src="https://cdn.tailwindcss.com"></script>
+"        <!-- Tailwind CDN removed for performance and CSP compliance -->"https://cdn.tailwindcss.com"></script>
         <style id="critical-styles">${compressedCriticalCss}</style>
         ${compressedDeferredCss ? `<style id="deferred-styles" media="print" onload="this.media='all'">${compressedDeferredCss}</style>` : ''}
       </head>

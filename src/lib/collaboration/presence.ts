@@ -34,7 +34,7 @@ export class CollaborationPresenceEngine {
   /**
    * Retrieves all active designers currently collaborating in the page builder workspace
    */
-  public static getActiveCollaborators(): ClientPresence[] {
+"  public static getActiveCollaborators(): ClientPresence[] {
     const now = Date.now();
     const activeList: ClientPresence[] = [];
 

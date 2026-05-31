@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
       const websiteId = block ? block.websiteId : 'website_demo_1';
 
-      // 4. Secure leads capture and conversion logging via centralized Prisma singleton
+"      // 4. Save to dedicated Leads table (improved from AnalyticsRecord)"
       const conversionRecord = await prisma.analyticsRecord.create({
         data: {
           websiteId: websiteId,

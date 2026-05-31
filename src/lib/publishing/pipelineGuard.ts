@@ -102,7 +102,7 @@ export class PipelineGuard {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Maintenance | ${schema.title}</title>
-        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Tailwind CDN removed -->
         <style>
           body { font-family: sans-serif; background: #0f172a; color: #f8fafc; }
         </style>
