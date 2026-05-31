@@ -29,18 +29,18 @@ const faqs = [
 
 function Metric({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 text-center shadow-2xl shadow-black/10 backdrop-blur-xl">
-      <p className="text-3xl font-black text-white">{value}</p>
-      <p className="mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{label}</p>
+    <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-4 text-center shadow-2xl shadow-black/10 backdrop-blur-xl sm:p-5">
+      <p className="text-2xl font-black text-white sm:text-3xl">{value}</p>
+      <p className="mt-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-slate-400 sm:mt-2 sm:text-[10px] sm:tracking-[0.2em]">{label}</p>
     </div>
   );
 }
 
 function ProductPreview() {
   return (
-    <div className="relative mx-auto mt-12 max-w-6xl px-4">
+    <div className="relative mx-auto mt-10 max-w-6xl px-0 sm:mt-12 sm:px-4">
       <div className="absolute inset-0 -z-10 rounded-[3rem] bg-gradient-to-tr from-indigo-500/20 via-fuchsia-500/10 to-cyan-500/20 blur-3xl" />
-      <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/50">
+      <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/50 sm:rounded-[2rem]">
         <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.035] px-5 py-3">
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full bg-rose-400" />
@@ -84,28 +84,30 @@ export default function PublicHomepage() {
       <PremiumNavbar />
 
       <main>
-        <section className="relative px-6 pb-20 pt-32 text-center md:pt-40">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,#4f46e544,transparent_34rem),radial-gradient(circle_at_80%_15%,#ec489933,transparent_28rem)]" />
+        <section className="relative isolate overflow-hidden px-5 pb-14 pt-24 text-center sm:pt-28 md:px-6 md:pb-20 md:pt-40">
+          <div className="pointer-events-none absolute inset-0 -z-10 bg-[#050716]" />
+          <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.30),transparent_30rem),radial-gradient(circle_at_85%_16%,rgba(34,211,238,0.16),transparent_24rem),radial-gradient(circle_at_15%_20%,rgba(168,85,247,0.16),transparent_24rem)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-indigo-500/10 to-transparent" />
           <div className="relative z-10 mx-auto max-w-5xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-indigo-300 shadow-inner">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
-              165 templates · Visual editor · Edge publishing
+            <div className="mx-auto inline-flex max-w-[92vw] items-center justify-center gap-2 rounded-full border border-indigo-300/25 bg-white/[0.075] px-3.5 py-2 text-[9px] font-black uppercase leading-relaxed tracking-[0.12em] text-indigo-100 shadow-2xl shadow-indigo-950/30 backdrop-blur-xl sm:px-4 sm:py-2.5 sm:text-[10px] sm:tracking-[0.22em]">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
+              <span className="max-w-[72vw] sm:max-w-none">165 templates · Visual editor · Edge publishing</span>
             </div>
-            <h1 className="mt-7 bg-gradient-to-r from-white via-indigo-100 to-slate-400 bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-7xl md:leading-[0.95]">
+            <h1 className="mx-auto mt-6 max-w-4xl text-[2.6rem] font-black leading-[1.02] tracking-[-0.06em] text-white drop-shadow-[0_10px_40px_rgba(99,102,241,0.28)] min-[390px]:text-5xl sm:mt-7 sm:text-6xl md:text-7xl md:leading-[0.95]">
               Build professional landing pages at global product quality.
             </h1>
-            <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-400 md:text-lg">
+            <p className="mx-auto mt-5 max-w-3xl text-[15px] leading-8 text-slate-300 sm:text-base md:text-lg md:leading-9">
               Vortic is a no-code website operating system for launching premium pages from templates, editing them visually, securing every submission, and publishing with the Vext™ compiler workflow.
             </p>
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a href="/editor" className="w-full rounded-2xl bg-white px-7 py-4 text-xs font-black uppercase tracking-wider text-slate-950 shadow-2xl shadow-white/10 transition hover:bg-indigo-100 sm:w-auto">
+            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:mt-9 sm:flex-row">
+              <a href="/editor" className="w-full rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400 px-7 py-4 text-xs font-black uppercase tracking-wider text-white shadow-2xl shadow-indigo-500/25 transition hover:scale-[1.01] hover:brightness-110 sm:w-auto">
                 Open Visual Editor
               </a>
-              <a href="/templates" className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-7 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:border-indigo-400/60 hover:bg-indigo-500/10 sm:w-auto">
+              <a href="/templates" className="w-full rounded-2xl border border-white/15 bg-white/[0.08] px-7 py-4 text-xs font-black uppercase tracking-wider text-white shadow-2xl shadow-black/20 backdrop-blur-xl transition hover:border-cyan-300/60 hover:bg-white/[0.12] sm:w-auto">
                 Browse Templates
               </a>
             </div>
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div className="mt-8 grid gap-3 sm:grid-cols-3 md:mt-10 md:gap-4">
               <Metric value="165" label="Professional templates" />
               <Metric value="0" label="Production audit vulns" />
               <Metric value="1" label="Unified builder OS" />

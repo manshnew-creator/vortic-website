@@ -10,9 +10,9 @@ const navLinks = [
 
 function VorticLogo() {
   return (
-    <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 ring-1 ring-white/10">
+    <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-950 ring-1 ring-white/10 sm:h-10 sm:w-10">
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 opacity-40 blur-md" />
-      <svg className="relative h-7 w-7" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <svg className="relative h-6 w-6 sm:h-7 sm:w-7" viewBox="0 0 100 100" fill="none" aria-hidden="true">
         <defs>
           <linearGradient id="nav-vortex-a" x1="0" x2="100" y1="0" y2="100">
             <stop stopColor="#818cf8" />
@@ -35,13 +35,13 @@ function VorticLogo() {
 
 export function PremiumNavbar() {
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-slate-950/75 backdrop-blur-2xl supports-[backdrop-filter]:bg-slate-950/55">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-2xl supports-[backdrop-filter]:bg-slate-950/60">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-6 lg:px-8">
         <a href="/" className="group flex items-center gap-3" aria-label="Vortic homepage">
           <VorticLogo />
           <div className="leading-none">
-            <p className="text-sm font-black tracking-tight text-white">vortic</p>
-            <p className="mt-1 text-[9px] font-black uppercase tracking-[0.24em] text-indigo-400">Vext™ Engine</p>
+            <p className="text-sm font-black tracking-tight text-white sm:text-[15px]">vortic</p>
+            <p className="mt-1 text-[8px] font-black uppercase tracking-[0.22em] text-indigo-300 sm:text-[9px]">Vext™ Engine</p>
           </div>
         </a>
 
@@ -63,7 +63,7 @@ export function PremiumNavbar() {
         </div>
 
         <details className="group relative sm:hidden">
-          <summary className="list-none rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-2 text-xs font-black text-white marker:hidden">
+          <summary className="list-none rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-black/20 marker:hidden">
             Menu
           </summary>
           <div className="absolute right-0 mt-3 w-64 overflow-hidden rounded-3xl border border-white/10 bg-slate-950 p-2 shadow-2xl shadow-black/60">
