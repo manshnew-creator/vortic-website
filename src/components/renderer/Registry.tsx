@@ -42,11 +42,23 @@ export const getStylesForBlock = (block: BaseBlock, viewport: 'desktop' | 'table
     if (typography.textTransform) style.textTransform = typography.textTransform;
     if (typography.textDecoration) style.textDecoration = typography.textDecoration;
 
-    const fs = resolveResponsiveValue(typography.fontSize, viewport);
+    let fs = resolveResponsiveValue(typography.fontSize, viewport);
     const fw = resolveResponsiveValue(typography.fontWeight, viewport);
     const lh = resolveResponsiveValue(typography.lineHeight, viewport);
     const ls = resolveResponsiveValue(typography.letterSpacing, viewport);
     const ta = resolveResponsiveValue(typography.textAlign, viewport);
+
+    // ADAPTIVE LAYOUT INTELLIGENCE: Auto-scale/Cap massive font sizes on mobile viewports
+    // to prevent ugly text wrapping or container overflows (Lighthouse UX Polish)
+    if (viewport === 'mobile' && typeof fs === 'string') {
+      if (fs.endsWith('rem')) {
+        const val = parseFloat(fs);
+        if (val > 1.75) fs = '1.75rem'; // Cap at 28px
+      } else if (fs.endsWith('px')) {
+        const val = parseFloat(fs);
+        if (val > 28) fs = '28px';
+      }
+    }
 
     if (fs) style.fontSize = fs;
     if (fw) style.fontWeight = fw;

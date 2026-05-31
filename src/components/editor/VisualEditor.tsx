@@ -1,6 +1,6 @@
 'use client'; // ENFORCE CLIENT RUNTIME ON NEXT.JS 15 (RSC Resolution)
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { LeftSidebar } from './LeftSidebar';
 import { VisualEditorBridge } from './VisualEditorBridge';
@@ -169,6 +169,10 @@ const MOCK_INITIAL_SCHEMA: PageBuilderSchema = {
 export const VisualEditor: React.FC = () => {
   const { schema, initSchema, undo, redo, history, historyIndex, hasUnsavedChanges, isSaving, setSaving, markSaved } = useEditorStore();
 
+  // ADAPTIVE MOBILE LAYOUT SYSTEM (حل مشكلة تداخل الصفحات والتصميم على الجوال)
+  // Allows small/mobile screens to toggle smoothly between active editing views
+  const [activeTab, setActiveTab] = useState<'canvas' | 'elements' | 'styles'>('canvas');
+
   // Load Initial Mock Layout Schema on Mount
   useEffect(() => {
     initSchema(MOCK_INITIAL_SCHEMA);
@@ -240,26 +244,26 @@ export const VisualEditor: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col overflow-hidden bg-gray-50 font-sans">
+    <div className="w-full h-screen flex flex-col overflow-hidden bg-slate-950 font-sans text-slate-100">
       {/* Top Navbar */}
-      <header className="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-6 z-20">
-        <div className="flex items-center space-x-3">
-          <div className="bg-blue-600 text-white font-extrabold text-sm w-8 h-8 rounded-lg flex items-center justify-center">
-            N
+      <header className="h-14 border-b border-slate-900 bg-slate-950 flex items-center justify-between px-4 z-20">
+        <div className="flex items-center space-x-2.5">
+          <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-black text-sm w-8 h-8 rounded-lg flex items-center justify-center shadow-md">
+            V
           </div>
-          <div>
-            <h1 className="text-sm font-bold text-gray-800 leading-none">SaaS Lander Builder</h1>
-            <span className="text-[10px] text-gray-400">Principal No-Code Engine</span>
+          <div className="text-left">
+            <h1 className="text-xs font-black text-white leading-none">vortic workspace</h1>
+            <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider">Vext™ compiler</span>
           </div>
         </div>
 
         {/* Undo, Redo, Autosave Indicators */}
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-1.5 border-r border-gray-200 pr-4">
+        <div className="flex items-center space-x-3">
+          <div className="hidden sm:flex items-center space-x-1 border-r border-slate-800 pr-3">
             <button
               onClick={undo}
               disabled={historyIndex <= 0}
-              className="p-1.5 hover:bg-gray-100 rounded disabled:opacity-40 transition-colors"
+              className="p-1 hover:bg-slate-900 rounded disabled:opacity-30 transition-colors"
               title="Undo (Ctrl+Z)"
             >
               ↩️
@@ -267,51 +271,78 @@ export const VisualEditor: React.FC = () => {
             <button
               onClick={redo}
               disabled={historyIndex >= history.length - 1}
-              className="p-1.5 hover:bg-gray-100 rounded disabled:opacity-40 transition-colors"
+              className="p-1 hover:bg-slate-900 rounded disabled:opacity-30 transition-colors"
               title="Redo (Ctrl+Shift+Z)"
             >
               ↪️
             </button>
           </div>
 
-          <div className="text-xs text-gray-500 flex items-center space-x-1.5">
+          <div className="text-[10px] text-slate-400 flex items-center space-x-1.5">
             {isSaving ? (
-              <>
-                <span className="inline-block w-2.5 h-2.5 bg-yellow-400 rounded-full animate-ping"></span>
-                <span>Saving updates...</span>
-              </>
+              <span className="text-amber-400 animate-pulse">Saving...</span>
             ) : hasUnsavedChanges ? (
-              <>
-                <span className="inline-block w-2.5 h-2.5 bg-blue-500 rounded-full"></span>
-                <span>Unsaved modifications</span>
-              </>
+              <span className="text-indigo-400">Unsaved</span>
             ) : (
-              <>
-                <span className="inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
-                <span>All changes autosaved</span>
-              </>
+              <span className="text-emerald-400">Saved</span>
             )}
           </div>
 
           <button
             onClick={handlePublish}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-md shadow-sm transition-all flex items-center"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg shadow-lg shadow-indigo-600/10 transition-all flex items-center uppercase tracking-wider"
           >
-            🚀 Publish Production Live
+            🚀 Publish
           </button>
         </div>
       </header>
 
+      {/* MOBILE ADAPTIVE WORKSPACE TABS SWITCHER (حاسم للشاشات الصغيرة والجوال) */}
+      <div className="flex lg:hidden bg-slate-950 border-b border-slate-900 text-xs font-bold font-mono">
+        <button
+          onClick={() => setActiveTab('canvas')}
+          className={`flex-1 py-3 border-b-2 transition-colors ${
+            activeTab === 'canvas' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-500'
+          }`}
+        >
+          🎨 Canvas
+        </button>
+        <button
+          onClick={() => setActiveTab('elements')}
+          className={`flex-1 py-3 border-b-2 transition-colors ${
+            activeTab === 'elements' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-500'
+          }`}
+        >
+          ➕ Elements
+        </button>
+        <button
+          onClick={() => setActiveTab('styles')}
+          className={`flex-1 py-3 border-b-2 transition-colors ${
+            activeTab === 'styles' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-500'
+          }`}
+        >
+          ⚙️ Styles
+        </button>
+      </div>
+
       {/* Editor Main Content Area Layout */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar block selection */}
-        <LeftSidebar />
+      <div className="flex-1 flex overflow-hidden relative">
+        
+        {/* Left Sidebar - Rendered always on Desktop, toggled on Mobile */}
+        <div className={`${activeTab === 'elements' ? 'flex' : 'hidden'} lg:flex h-full border-r border-slate-900`}>
+          <LeftSidebar />
+        </div>
 
         {/* Dynamic, Real-time Visual Editor Bridge & Constraints Canvas */}
-        <VisualEditorBridge />
+        <div className={`${activeTab === 'canvas' ? 'flex' : 'hidden'} lg:flex flex-1 h-full`}>
+          <VisualEditorBridge />
+        </div>
 
         {/* Right properties configuration */}
-        <RightPanel />
+        <div className={`${activeTab === 'styles' ? 'flex' : 'hidden'} lg:flex h-full border-l border-slate-900`}>
+          <RightPanel />
+        </div>
+        
       </div>
     </div>
   );

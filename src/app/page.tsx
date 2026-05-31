@@ -3,30 +3,55 @@ import React from 'react';
 /**
  * VORTIC.WEBSITE OFFICIAL PREMIUM LANDING PAGE (Next.js App Router)
  * 
- * Features:
- * - High-end, Framer-tier aesthetic with deep space dark theme (bg-slate-950).
- * - Glowing radial and linear gradients (`bg-gradient-to-tr`, `bg-clip-text`).
- * - Highly structured Conversion Hierarchy (Hero CTAs, Social Proof, Features, Live Metrics HUD).
- * - Fully responsive, mobile-perfect layout with sub-10ms compiled Edge loading.
+ * Upgraded Features:
+ * - Brand text updated from "Vortic.website" to "vortic" in the navbar.
+ * - Custom, ultra-premium energetic SVG Vortex logo designed to look extremely unique (Unicorn-Grade Brand).
+ * - Implements rich visual spacing, responsive layout reasoning, and conversion-trigger CTAs.
  */
 export default function PublicHomepage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden font-sans relative selection:bg-indigo-500 selection:text-white">
       
-      {/* Background glowing gradients (Framer-style visual polish) */}
+      {/* Background glowing gradients */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-indigo-900/15 via-transparent to-transparent blur-3xl pointer-events-none" />
       <div className="absolute top-[400px] right-0 w-[400px] h-[400px] bg-indigo-500/5 blur-3xl pointer-events-none rounded-full" />
       <div className="absolute top-[800px] left-0 w-[400px] h-[400px] bg-purple-500/5 blur-3xl pointer-events-none rounded-full" />
 
-      {/* 1. GLOBAL PREMIUM NAVBAR */}
+      {/* 1. GLOBAL PREMIUM NAVBAR WITH ULTRA-UNIQUE SVG LOGO */}
       <header className="h-16 border-b border-slate-900 bg-slate-950/50 backdrop-blur-xl fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 md:px-12">
         <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-black text-sm w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            V
+          
+          {/* Custom Energetic SVG Vortex Logo (Extremely Unique Design) */}
+          <div className="relative w-10 h-10 flex items-center justify-center group cursor-pointer">
+            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition-opacity" />
+            <svg 
+              className="w-8 h-8 relative z-10 transform group-hover:rotate-180 transition-transform duration-700 ease-out" 
+              viewBox="0 0 100 100" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="vortexGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="100%" stopColor="#a855f7" />
+                </linearGradient>
+                <linearGradient id="vortexGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ec4899" />
+                  <stop offset="100%" stopColor="#f43f5e" />
+                </linearGradient>
+              </defs>
+              {/* Outer swirl */}
+              <path d="M50 10C72.0914 10 90 27.9086 90 50C90 62.1152 84.6063 72.9702 76 80.2487M50 90C27.9086 90 10 72.0914 10 50C10 40.548 13.2796 31.8601 18.7846 25" stroke="url(#vortexGrad1)" strokeWidth="8" strokeLinecap="round" />
+              {/* Inner energetic swirl */}
+              <path d="M50 25C63.8071 25 75 36.1929 75 50C75 56.5182 72.5117 62.4552 68.4312 66.928M50 75C36.1929 75 25 63.8071 25 50C25 45.419 26.2346 41.1264 28.3888 37.4583" stroke="url(#vortexGrad2)" strokeWidth="6" strokeLinecap="round" />
+              {/* Central glowing core node */}
+              <circle cx="50" cy="50" r="10" fill="#ffffff" className="animate-pulse" />
+            </svg>
           </div>
+
           <div>
-            <h1 className="text-sm font-black tracking-tight text-white leading-none">Vortic.website</h1>
-            <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-widest mt-0.5 block">Vext™ compiler</span>
+            <h1 className="text-base font-black tracking-tight text-white leading-none">vortic</h1>
+            <span className="text-[8px] text-indigo-400 font-bold uppercase tracking-widest mt-0.5 block">Vext™ compiler</span>
           </div>
         </div>
 
@@ -46,7 +71,7 @@ export default function PublicHomepage() {
         </a>
       </header>
 
-      {/* 2. HERO SECTION (Conversion Psychology & Visual Rhythm) */}
+      {/* 2. HERO SECTION */}
       <section className="pt-32 pb-20 px-6 text-center relative z-10">
         <div className="max-w-4xl mx-auto space-y-6">
           
@@ -103,7 +128,7 @@ export default function PublicHomepage() {
         </div>
       </section>
 
-      {/* 4. PERFORMANCE METRICS HUD (Visual Polish & Trust) */}
+      {/* 4. PERFORMANCE METRICS HUD */}
       <section className="py-12 bg-slate-950 relative z-10">
         <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 text-center space-y-1">
