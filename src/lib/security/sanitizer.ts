@@ -62,6 +62,18 @@ export class HtmlXssSanitizer {
       cleanHtml = cleanHtml.replace(unquotedRegex, '');
     });
 
+    // 3. Neutralize dangerous URL-bearing attributes that can execute script payloads.
+    cleanHtml = cleanHtml.replace(
+      /\s(href|src|xlink:href|formaction)\s*=\s*(["']?)\s*(javascript:|vbscript:|data:text\/html)[^"'\s>]*/gi,
+      ''
+    );
+
+    // 4. Prevent reverse-tabnabbing for user-authored links opened in new tabs.
+    cleanHtml = cleanHtml.replace(/<a\b([^>]*\btarget\s*=\s*["']?_blank["']?[^>]*)>/gi, (match, attrs) => {
+      if (/\brel\s*=/i.test(attrs)) return match;
+      return `<a${attrs} rel="noopener noreferrer">`;
+    });
+
     return cleanHtml.trim();
   }
 

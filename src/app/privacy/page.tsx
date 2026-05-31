@@ -1,4 +1,5 @@
 import React from 'react';
+import { PremiumFooter } from '../../components/layout/PremiumFooter';
 
 /**
  * VORTIC COMPLIANT PRIVACY POLICY PAGE (Next.js App Router)
@@ -54,6 +55,9 @@ export default function PrivacyPolicyPage() {
           </p>
         </section>
 
+      </div>
+      <div className="-mx-6 mt-16">
+        <PremiumFooter />
       </div>
     </div>
   );

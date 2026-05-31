@@ -1,10 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { PrismaClient } from '@prisma/client';
 import { StaticPageRenderer } from '../../../../components/renderer/BlockRenderer';
 import { PageBuilderSchema } from '../../../../types/builder';
-
-const prisma = new PrismaClient();
+import prisma from '../../../../lib/db/prisma';
 
 // تفعيل ميزة الـ ISR: إعادة بناء الصفحة استاتيكياً في الخلفية كل ساعة (3600 ثانية)
 // أو استخدام On-Demand Revalidation عند الضغط على Publish في لوحة التحكم

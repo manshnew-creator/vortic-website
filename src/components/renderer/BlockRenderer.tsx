@@ -1,5 +1,7 @@
-import React, { useTransition } from 'react';
-import { BaseBlock, PageBuilderSchema } from '../../types/builder';
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { PageBuilderSchema } from '../../types/builder';
 import {
   SectionBlock,
   ContainerBlock,
@@ -10,7 +12,9 @@ import {
   ImageBlock,
   VideoBlock,
   FormBlock,
-  resolveResponsiveValue,
+  InputBlock,
+  TextAreaBlock,
+  SubmitButtonBlock,
 } from './Registry';
 
 interface BlockRendererProps {
@@ -115,6 +119,15 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'form':
       element = <FormBlock block={block} viewport={viewport}>{renderChildren()}</FormBlock>;
       break;
+    case 'input':
+      element = <InputBlock block={block} viewport={viewport} />;
+      break;
+    case 'textarea':
+      element = <TextAreaBlock block={block} viewport={viewport} />;
+      break;
+    case 'submit-button':
+      element = <SubmitButtonBlock block={block} viewport={viewport} />;
+      break;
     default:
       // Unknown fallback
       element = (
@@ -132,12 +145,27 @@ interface StaticPageRendererProps {
 }
 
 export const StaticPageRenderer: React.FC<StaticPageRendererProps> = ({ schema }) => {
+  const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+
+  useEffect(() => {
+    const syncViewport = () => {
+      const width = window.innerWidth;
+      if (width < 640) setViewport('mobile');
+      else if (width < 1024) setViewport('tablet');
+      else setViewport('desktop');
+    };
+
+    syncViewport();
+    window.addEventListener('resize', syncViewport);
+    return () => window.removeEventListener('resize', syncViewport);
+  }, []);
+
   return (
     <div className="w-full min-h-screen bg-white text-gray-900 overflow-x-hidden">
       <BlockRenderer
         blockId={schema.rootBlockId}
         schema={schema}
-        viewport="desktop"
+        viewport={viewport}
         isEditorMode={false}
       />
     </div>

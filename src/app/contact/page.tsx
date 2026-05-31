@@ -1,4 +1,8 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import { toast } from '../../components/ui/ToastProvider';
+import { PremiumFooter } from '../../components/layout/PremiumFooter';
 
 /**
  * VORTIC PREMIUM CONTACT & SUPPORT DESK PAGE (Next.js App Router)
@@ -10,6 +14,41 @@ import React from 'react';
  * - Integrated sales funnel routing for enterprise clients.
  */
 export default function ContactPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/forms/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formId: 'support_ticket', data }),
+      });
+
+      if (!response.ok) throw new Error('Ticket submission failed');
+
+      toast({
+        title: 'Ticket received',
+        description: 'We will reply to your email as soon as possible.',
+        variant: 'success',
+      });
+      form.reset();
+    } catch {
+      toast({
+        title: 'Could not send ticket',
+        description: 'Please email support@vortic.website directly while we reconnect the support API.',
+        variant: 'error',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 py-20 px-6 font-sans relative overflow-hidden">
       {/* Background radial glow */}
@@ -72,7 +111,7 @@ export default function ContactPage() {
           </div>
 
           {/* 2. Contact Ingestion Form */}
-          <form className="bg-slate-900 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 space-y-4 shadow-2xl">
+          <form onSubmit={handleSubmit} className="bg-slate-900 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 space-y-4 shadow-2xl" aria-busy={isSubmitting}>
             <h2 className="text-lg font-bold text-white">Submit a Ticket</h2>
             
             {/* SPAM PROTECTION: Hidden Honeypot Field (invisible to humans, traps bots) */}
@@ -89,6 +128,7 @@ export default function ContactPage() {
               <label className="text-[10px] uppercase font-bold text-slate-400">Full Name</label>
               <input
                 type="text"
+                name="name"
                 placeholder="John Doe"
                 required
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -99,6 +139,7 @@ export default function ContactPage() {
               <label className="text-[10px] uppercase font-bold text-slate-400">Email Address</label>
               <input
                 type="email"
+                name="email"
                 placeholder="john@example.com"
                 required
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -109,6 +150,7 @@ export default function ContactPage() {
               <label className="text-[10px] uppercase font-bold text-slate-400">Message / Inquiry Details</label>
               <textarea
                 rows={4}
+                name="message"
                 placeholder="Describe your request..."
                 required
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -117,14 +159,18 @@ export default function ContactPage() {
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20"
+              disabled={isSubmitting}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20"
             >
-              Submit Ticket ➡️
+              {isSubmitting ? 'Sending securely...' : 'Submit Ticket ➡️'}
             </button>
           </form>
 
         </div>
 
+      </div>
+      <div className="relative z-10 -mx-6 mt-16">
+        <PremiumFooter />
       </div>
     </div>
   );

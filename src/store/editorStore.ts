@@ -274,7 +274,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     deleteRecursively(blockId);
 
-    const nextSelected = selectedBlockId === blockId ? null : selectedBlockId;
+    const deletedIds = new Set<string>();
+    const collectDeletedIds = (id: string) => {
+      deletedIds.add(id);
+      const b = schema.blocks[id];
+      b?.children.forEach(collectDeletedIds);
+    };
+    collectDeletedIds(blockId);
+
+    const nextSelected = selectedBlockId && deletedIds.has(selectedBlockId) ? null : selectedBlockId;
 
     set({ selectedBlockId: nextSelected });
     pushToHistory(nextSchema);
@@ -322,6 +330,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.children.push(clonedRootId);
     }
 
+    set({ selectedBlockId: clonedRootId });
     pushToHistory(nextSchema);
   },
 
@@ -343,13 +352,19 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }
 
     const sourceParent = nextSchema.blocks[sourceParentId];
+    const originalIndex = sourceParent?.children.indexOf(blockId) ?? -1;
     if (sourceParent) {
       sourceParent.children = sourceParent.children.filter((id) => id !== blockId);
     }
 
     block.parentId = targetParentId;
-    targetParent.children.splice(targetIndex, 0, blockId);
+    const adjustedIndex = sourceParentId === targetParentId && originalIndex > -1 && targetIndex > originalIndex
+      ? targetIndex - 1
+      : targetIndex;
+    const safeIndex = Math.max(0, Math.min(adjustedIndex, targetParent.children.length));
+    targetParent.children.splice(safeIndex, 0, blockId);
 
+    set({ selectedBlockId: blockId });
     pushToHistory(nextSchema);
   },
 

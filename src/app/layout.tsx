@@ -1,5 +1,6 @@
 import React from 'react';
 import './globals.css'; // IMPORT TAILWIND GLOBALS CSS (Issue Resolution)
+import { ToastProvider } from '../components/ui/ToastProvider';
 
 export const metadata = {
   title: 'Vortic.website | The Website Operating System',
@@ -25,7 +26,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body className="antialiased bg-slate-950 text-slate-100 min-h-screen">
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

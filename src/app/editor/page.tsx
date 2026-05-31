@@ -12,7 +12,7 @@ import { VisualEditor } from '../../components/editor/VisualEditor';
  */
 export default function EditorPageRoute() {
   return (
-    <main className="w-full h-screen overflow-hidden bg-white text-slate-800">
+    <main className="w-full h-dvh overflow-hidden bg-white text-slate-800">
       <VisualEditor />
     </main>
   );

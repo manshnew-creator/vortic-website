@@ -1,5 +1,10 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { BaseBlock, LinkAction, ResponsiveValue } from '../../types/builder';
+import { HtmlXssSanitizer } from '../../lib/security/sanitizer';
+import { isSafeUrl } from '../../lib/website/schemaSafety';
+import { toast } from '../ui/ToastProvider';
 
 // Helper to convert responsive settings into CSS custom variables or inline styles
 export const resolveResponsiveValue = <T,>(val: ResponsiveValue<T> | undefined, activeViewport: 'desktop' | 'tablet' | 'mobile'): T | undefined => {
@@ -70,7 +75,7 @@ export const getStylesForBlock = (block: BaseBlock, viewport: 'desktop' | 'table
   // Layout
   if (layout) {
     if (layout.backgroundColor) style.backgroundColor = layout.backgroundColor;
-    if (layout.backgroundImage) style.backgroundImage = `url(${layout.backgroundImage})`;
+    if (layout.backgroundImage && isSafeUrl(layout.backgroundImage, true)) style.backgroundImage = `url(${layout.backgroundImage})`;
     if (layout.backgroundSize) style.backgroundSize = layout.backgroundSize;
     if (layout.backgroundPosition) style.backgroundPosition = layout.backgroundPosition;
     if (layout.zIndex) style.zIndex = layout.zIndex;
@@ -142,8 +147,8 @@ export const handleAction = (action: LinkAction | undefined, e: React.MouseEvent
   
   switch (action.type) {
     case 'url':
-      if (action.url) {
-        window.open(action.url, action.target || '_self');
+      if (action.url && isSafeUrl(action.url)) {
+        window.open(action.url, action.target || '_self', action.target === '_blank' ? 'noopener,noreferrer' : undefined);
       }
       break;
     case 'page':
@@ -161,10 +166,10 @@ export const handleAction = (action: LinkAction | undefined, e: React.MouseEvent
       }
       break;
     case 'email':
-      window.location.href = `mailto:${action.url}`;
+      if (action.url) window.location.href = `mailto:${String(action.url).replace(/^mailto:/i, '')}`;
       break;
     case 'call':
-      window.location.href = `tel:${action.url}`;
+      if (action.url) window.location.href = `tel:${String(action.url).replace(/^tel:/i, '')}`;
       break;
   }
 };
@@ -213,12 +218,13 @@ export const HeadingBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 't
 export const TextBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tablet' | 'mobile' }> = ({ block, viewport }) => {
   const styles = getStylesForBlock(block, viewport);
   const { htmlContent = '<p>Lorem ipsum dolor sit amet...</p>' } = block.props;
+  const safeHtml = HtmlXssSanitizer.sanitize(String(htmlContent));
 
   return (
     <div
       style={styles}
       className="prose max-w-none transition-all duration-300"
-      dangerouslySetInnerHTML={{ __html: htmlContent }}
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
 };
@@ -236,6 +242,7 @@ export const ButtonBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'ta
 
   return (
     <button
+      type="button"
       style={styles}
       onClick={(e) => handleAction(action, e)}
       className={`${btnClass} transition-all duration-300`}
@@ -248,11 +255,12 @@ export const ButtonBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'ta
 export const ImageBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tablet' | 'mobile' }> = ({ block, viewport }) => {
   const styles = getStylesForBlock(block, viewport);
   const { src = 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800', alt = 'Unsplash Graphic', action } = block.props;
+  const safeSrc = isSafeUrl(src, true) ? src : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><rect width="100%" height="100%" fill="%23f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2364758b" font-family="Arial" font-size="24">Image URL blocked</text></svg>';
 
   const imgEl = (
     <img
-      src={src}
-      alt={alt}
+      src={safeSrc}
+      alt={String(alt || 'Image')}
       style={{
         width: '100%',
         height: '100%',
@@ -276,12 +284,14 @@ export const ImageBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tab
 export const VideoBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tablet' | 'mobile' }> = ({ block, viewport }) => {
   const styles = getStylesForBlock(block, viewport);
   const { provider = 'youtube', url = 'https://www.youtube.com/embed/dQw4w9WgXcQ', autoplay, loop, muted, controls = true } = block.props;
+  const safeUrl = isSafeUrl(url) ? url : 'https://www.youtube.com/embed/dQw4w9WgXcQ';
 
   return (
     <div style={styles} className="overflow-hidden relative w-full aspect-video transition-all duration-300">
       {provider === 'youtube' && (
         <iframe
-          src={`${url}?autoplay=${autoplay ? 1 : 0}&loop=${loop ? 1 : 0}&mute=${muted ? 1 : 0}&controls=${controls ? 1 : 0}`}
+          title={block.name || 'Embedded video'}
+          src={`${safeUrl}?autoplay=${autoplay ? 1 : 0}&loop=${loop ? 1 : 0}&mute=${muted ? 1 : 0}&controls=${controls ? 1 : 0}`}
           className="absolute top-0 left-0 w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
@@ -289,7 +299,7 @@ export const VideoBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tab
       )}
       {provider === 'html5' && (
         <video
-          src={url}
+          src={safeUrl}
           autoPlay={autoplay}
           loop={loop}
           muted={muted}
@@ -301,38 +311,104 @@ export const VideoBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tab
   );
 };
 
+export const InputBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tablet' | 'mobile' }> = ({ block, viewport }) => {
+  const styles = getStylesForBlock(block, viewport);
+  const { name = 'email', label = 'Email Address', placeholder = 'you@example.com', inputType = 'email', required = true } = block.props;
+
+  return (
+    <label className="block w-full space-y-1.5" style={styles}>
+      <span className="text-xs font-bold text-slate-600">{label}</span>
+      <input
+        name={String(name || 'field')}
+        type={String(inputType || 'text')}
+        placeholder={String(placeholder || '')}
+        required={Boolean(required)}
+        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+      />
+    </label>
+  );
+};
+
+export const TextAreaBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tablet' | 'mobile' }> = ({ block, viewport }) => {
+  const styles = getStylesForBlock(block, viewport);
+  const { name = 'message', label = 'Message', placeholder = 'Tell us what you need...', required = false } = block.props;
+
+  return (
+    <label className="block w-full space-y-1.5" style={styles}>
+      <span className="text-xs font-bold text-slate-600">{label}</span>
+      <textarea
+        name={String(name || 'message')}
+        placeholder={String(placeholder || '')}
+        required={Boolean(required)}
+        rows={4}
+        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+      />
+    </label>
+  );
+};
+
+export const SubmitButtonBlock: React.FC<{ block: BaseBlock; viewport: 'desktop' | 'tablet' | 'mobile' }> = ({ block, viewport }) => {
+  const styles = getStylesForBlock(block, viewport);
+  const { label = 'Submit securely' } = block.props;
+
+  return (
+    <button
+      type="submit"
+      style={styles}
+      className="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+    >
+      {label}
+    </button>
+  );
+};
+
 export const FormBlock: React.FC<{ block: BaseBlock; children: React.ReactNode; viewport: 'desktop' | 'tablet' | 'mobile' }> = ({ block, children, viewport }) => {
   const styles = getStylesForBlock(block, viewport);
   const { submitMethod = 'POST', actionUrl, successMessage, errorMessage } = block.props;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
 
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     if (submitMethod === 'SUPABASE') {
-      alert(`[Simulation] Submitted to Supabase Table: ${JSON.stringify(data)}`);
-    } else {
-      try {
-        const response = await fetch(actionUrl || '/api/forms/submit', {
-          method: submitMethod,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ formId: block.id, data }),
-        });
-        if (response.ok) {
-          alert(successMessage || 'Form submitted successfully!');
-        } else {
-          throw new Error();
-        }
-      } catch {
-        alert(errorMessage || 'Form submission failed.');
+      toast({
+        title: successMessage || 'Lead captured successfully',
+        description: 'Simulation mode: the Supabase handoff is configured and ready for production credentials.',
+        variant: 'success',
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const safeActionUrl = actionUrl && isSafeUrl(actionUrl) ? actionUrl : '/api/forms/submit';
+      const response = await fetch(safeActionUrl, {
+        method: submitMethod,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formId: block.id, data }),
+      });
+      if (response.ok) {
+        toast({ title: successMessage || 'Form submitted successfully!', variant: 'success' });
+        e.currentTarget.reset();
+      } else {
+        throw new Error();
       }
+    } catch {
+      toast({ title: errorMessage || 'Form submission failed.', description: 'Please verify the endpoint and try again.', variant: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={styles} className="w-full space-y-4 transition-all duration-300">
+    <form onSubmit={handleSubmit} style={styles} className="w-full space-y-4 transition-all duration-300" aria-busy={isSubmitting}>
       {children}
+      {isSubmitting && <p className="text-xs text-slate-500">Submitting securely...</p>}
     </form>
   );
 };

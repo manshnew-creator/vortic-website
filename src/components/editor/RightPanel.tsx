@@ -23,7 +23,7 @@ export const RightPanel: React.FC = () => {
 
   if (!schema || !selectedBlockId) {
     return (
-      <div className="w-80 border-l border-gray-200 bg-white h-full flex items-center justify-center p-6 text-center select-none text-slate-800">
+      <div className="w-screen max-w-sm lg:w-80 border-l border-gray-200 bg-white h-full flex items-center justify-center p-6 text-center select-none text-slate-800">
         <div className="text-gray-400">
           <span className="text-3xl block mb-2">👈</span>
           <p className="text-xs">Select any element on the Canvas to configure properties and styles.</p>
@@ -52,7 +52,7 @@ export const RightPanel: React.FC = () => {
   };
 
   return (
-    <div className="w-80 border-l border-gray-200 bg-white h-full flex flex-col select-none text-xs text-slate-700">
+    <div className="w-screen max-w-sm lg:w-80 border-l border-gray-200 bg-white h-full flex flex-col select-none text-xs text-slate-700">
       {/* Block Header Information */}
       <div className="p-4 border-b border-gray-200 bg-gray-50/50">
         <div className="flex justify-between items-center mb-1">

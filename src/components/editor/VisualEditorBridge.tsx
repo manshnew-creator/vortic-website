@@ -7,6 +7,7 @@ import { AIAuthoringEngine, AuthoringSuggestion } from '../../lib/ai/authoring';
 import { CollaborationPresenceEngine, ClientPresence } from '../../lib/collaboration/presence';
 import { BlockRenderer } from '../renderer/BlockRenderer';
 import { Sandbox } from '../renderer/Sandbox';
+import { toast } from '../ui/ToastProvider';
 
 export const VisualEditorBridge: React.FC = () => {
   const { schema, viewportMode, setViewportMode, selectedBlockId, setSelectedBlockId, updateBlockProps } = useEditorStore();
@@ -78,7 +79,11 @@ export const VisualEditorBridge: React.FC = () => {
   const handleApplyAiSuggestion = (suggestion: AuthoringSuggestion) => {
     if (suggestion.blockId && suggestion.suggestedActionPatch) {
       updateBlockProps(suggestion.blockId, suggestion.suggestedActionPatch);
-      alert(`Applied AI optimization: ${suggestion.title}`);
+      toast({
+        title: 'AI optimization applied',
+        description: suggestion.title,
+        variant: 'success',
+      });
     }
   };
 

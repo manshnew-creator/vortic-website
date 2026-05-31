@@ -9,6 +9,8 @@ import { fitnessTemplate } from './templates/fitness';
 import { restaurantTemplate } from './templates/restaurant';
 import { agencyTemplate } from './templates/agency';
 import { creatorTemplate } from './templates/creator';
+import { professionalTemplatePack } from './templates/professionalPack';
+import { eliteTemplateExpansionPack } from './templates/eliteExpansionPack';
 
 export interface LandingPageTemplate {
   templateId: string;
@@ -29,12 +31,13 @@ export interface LandingPageTemplate {
 }
 
 /**
- * 10-NICHES CHUNKED TEMPLATE REGISTRY (مخزن القوالب التخصصي غير المحاكي بالكامل)
- * 
- * BUNDLE BLOAT RESOLUTION:
- * Split and chunked massive template JSON schemas (formerly 58KB) into modular, 
- * lightweight, individual chunk files inside `/templates/*` to optimize bundle weight.
- * Now features 100% genuine, fully written, independent, production-grade schemas for ALL 10 niches!
+ * VORTIC TEMPLATE REGISTRY
+ *
+ * Contains the original niche templates plus two premium generated packs:
+ * - professionalTemplatePack: 50 polished conversion templates.
+ * - eliteTemplateExpansionPack: 105 additional industry-specific templates.
+ *
+ * Total registry size: 165 templates, all exposed through the same API contract.
  */
 export const TEMPLATES_REGISTRY: Record<string, LandingPageTemplate> = {
   // 1. SaaS Premium Dark Mode (Chunked)
@@ -66,4 +69,10 @@ export const TEMPLATES_REGISTRY: Record<string, LandingPageTemplate> = {
 
   // 10. Creator Links in Bio (Chunked)
   creator_bio: creatorTemplate,
+
+  // 50. Additional professional conversion templates generated from a premium schema factory
+  ...professionalTemplatePack,
+
+  // 105. Elite expansion templates for more industries, offers, and conversion funnels
+  ...eliteTemplateExpansionPack,
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { PremiumFooter } from '../../components/layout/PremiumFooter';
 
 /**
  * VORTIC PREMIUM CONVERSION-READY PRICING PAGE (Next.js App Router)
@@ -109,11 +110,9 @@ export default function PricingPage() {
 
         </div>
 
-        {/* Footer legal notices required by Paddle */}
-        <div className="text-center text-[10px] text-slate-500 max-w-md mx-auto pt-6 leading-relaxed">
-          Our order process is conducted by our online reseller <a href="https://paddle.com" target="_blank" rel="noreferrer" className="underline hover:text-slate-300">Paddle.com</a>. Paddle is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns.
-        </div>
-
+      </div>
+      <div className="relative z-10 -mx-6 mt-16">
+        <PremiumFooter />
       </div>
     </div>
   );

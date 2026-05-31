@@ -6,6 +6,7 @@ import { LeftSidebar } from './LeftSidebar';
 import { VisualEditorBridge } from './VisualEditorBridge';
 import { RightPanel } from './RightPanel';
 import { PageBuilderSchema } from '../../types/builder';
+import { toast } from '../ui/ToastProvider';
 
 // Mock Initial Landing Page Builder Schema
 const MOCK_INITIAL_SCHEMA: PageBuilderSchema = {
@@ -167,60 +168,132 @@ const MOCK_INITIAL_SCHEMA: PageBuilderSchema = {
 };
 
 export const VisualEditor: React.FC = () => {
-  const { schema, initSchema, undo, redo, history, historyIndex, hasUnsavedChanges, isSaving, setSaving, markSaved } = useEditorStore();
+  const { schema, initSchema, undo, redo, history, historyIndex, hasUnsavedChanges, isSaving, setSaving, markSaved, deleteBlock, setSelectedBlockId } = useEditorStore();
 
   // ADAPTIVE MOBILE LAYOUT SYSTEM (حل مشكلة تداخل الصفحات والتصميم على الجوال)
   // Allows small/mobile screens to toggle smoothly between active editing views
   const [activeTab, setActiveTab] = useState<'canvas' | 'elements' | 'styles'>('canvas');
 
-  // Load Initial Mock Layout Schema on Mount
+  // Load a requested template from /editor?template=... first; otherwise restore latest local draft.
   useEffect(() => {
-    initSchema(MOCK_INITIAL_SCHEMA);
+    let cancelled = false;
+
+    const loadInitialSchema = async () => {
+      const requestedTemplateId = new URLSearchParams(window.location.search).get('template');
+
+      if (requestedTemplateId) {
+        try {
+          const response = await fetch(`/api/website/template?templateId=${encodeURIComponent(requestedTemplateId)}`);
+          if (!response.ok) throw new Error('Template request failed');
+          const payload = await response.json();
+          const templateSchema = payload.template?.schema;
+          if (!templateSchema) throw new Error('Template schema missing');
+
+          const nextSchema: PageBuilderSchema = {
+            ...templateSchema,
+            pageId: 'landing_page_demo_1',
+            slug: 'home',
+            title: payload.template?.name || templateSchema.title || 'Template Page',
+          };
+
+          if (!cancelled) {
+            initSchema(nextSchema);
+            window.localStorage.setItem('vortic:draft:landing_page_demo_1', JSON.stringify(nextSchema));
+            toast({ title: 'Template applied', description: payload.template?.name || requestedTemplateId, variant: 'success' });
+          }
+          return;
+        } catch {
+          toast({ title: 'Template could not be loaded', description: 'Opening your latest saved draft instead.', variant: 'warning' });
+        }
+      }
+
+      try {
+        const cachedDraft = window.localStorage.getItem('vortic:draft:landing_page_demo_1');
+        if (!cancelled) initSchema(cachedDraft ? JSON.parse(cachedDraft) : MOCK_INITIAL_SCHEMA);
+      } catch {
+        if (!cancelled) initSchema(MOCK_INITIAL_SCHEMA);
+      }
+    };
+
+    loadInitialSchema();
+    return () => { cancelled = true; };
   }, [initSchema]);
+
+  useEffect(() => {
+    if (!schema) return;
+    try {
+      window.localStorage.setItem('vortic:draft:landing_page_demo_1', JSON.stringify(schema));
+    } catch {
+      // Ignore storage quota issues; remote autosave remains the source of truth.
+    }
+  }, [schema]);
 
   // Autosave Simulator Hook
   useEffect(() => {
     if (!hasUnsavedChanges || isSaving || !schema) return;
 
     const handler = setTimeout(async () => {
+      const snapshot = JSON.stringify(schema);
       setSaving(true);
       try {
-        await fetch('/api/website/save', {
+        const response = await fetch('/api/website/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ schema }),
         });
-      } catch (err) {
-        console.warn('Saving mocked backend persistence state...');
-      } finally {
-        setTimeout(() => {
+
+        if (!response.ok) throw new Error('Autosave endpoint rejected the draft.');
+
+        if (JSON.stringify(useEditorStore.getState().schema) === snapshot) {
           markSaved();
-        }, 1000); // UI feel optimization
+        } else {
+          setSaving(false);
+        }
+      } catch {
+        setSaving(false);
+        toast({
+          title: 'Autosave paused',
+          description: 'Your edits are still safe in the editor. Connect the database or retry when the API is reachable.',
+          variant: 'warning',
+        });
       }
     }, 3000);
 
     return () => clearTimeout(handler);
   }, [schema, hasUnsavedChanges, isSaving, setSaving, markSaved]);
 
-  // Keyboard Shortcuts (Cmd+Z / Cmd+Shift+Z)
+  // Keyboard Shortcuts (Undo/Redo/Delete/Escape) with form-field safety guards
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isTyping = (!!target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) || !!target?.isContentEditable;
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const modifier = isMac ? e.metaKey : e.ctrlKey;
 
       if (modifier && e.key.toLowerCase() === 'z') {
         e.preventDefault();
-        if (e.shiftKey) {
-          redo();
-        } else {
-          undo();
-        }
+        if (e.shiftKey) redo();
+        else undo();
+        return;
+      }
+
+      if (isTyping) return;
+
+      if (e.key === 'Escape') {
+        setSelectedBlockId(null);
+        return;
+      }
+
+      if ((e.key === 'Delete' || e.key === 'Backspace') && useEditorStore.getState().selectedBlockId) {
+        e.preventDefault();
+        const selectedId = useEditorStore.getState().selectedBlockId;
+        if (selectedId) deleteBlock(selectedId);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo]);
+  }, [undo, redo, deleteBlock, setSelectedBlockId]);
 
   const handlePublish = async () => {
     if (!schema) return;
@@ -231,20 +304,26 @@ export const VisualEditor: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pageId: schema.pageId, content: schema }),
       });
-      if (response.ok) {
-        alert('🎉 Site published successfully to Edge CDN!');
-      } else {
-        throw new Error();
-      }
-    } catch {
-      alert('🚀 Published Successfully! (Simulated pipeline triggered: page JSON generated static optimized assets).');
-    } finally {
+      if (!response.ok) throw new Error('Publish endpoint rejected the request.');
+      const result = await response.json().catch(() => ({}));
+      toast({
+        title: 'Site published to the Edge',
+        description: result.jobId ? `Deployment job queued: ${result.jobId}` : 'Optimized static assets are being generated now.',
+        variant: 'success',
+      });
       markSaved();
+    } catch {
+      setSaving(false);
+      toast({
+        title: 'Publish could not be completed',
+        description: 'Check database/queue credentials, then try again. No draft changes were lost.',
+        variant: 'error',
+      });
     }
   };
 
   return (
-    <div className="w-full h-screen flex flex-col overflow-hidden bg-slate-950 font-sans text-slate-100">
+    <div className="w-full h-dvh flex flex-col overflow-hidden bg-slate-950 font-sans text-slate-100">
       {/* Top Navbar */}
       <header className="h-14 border-b border-slate-900 bg-slate-950 flex items-center justify-between px-4 z-20">
         <div className="flex items-center space-x-2.5">

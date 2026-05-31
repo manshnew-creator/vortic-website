@@ -1,4 +1,5 @@
 import React from 'react';
+import { PremiumFooter } from '../../components/layout/PremiumFooter';
 
 /**
  * VORTIC TERMS OF SERVICE PAGE (Next.js App Router)
@@ -55,6 +56,9 @@ export default function TermsOfServicePage() {
           </p>
         </section>
 
+      </div>
+      <div className="-mx-6 mt-16">
+        <PremiumFooter />
       </div>
     </div>
   );

@@ -1,220 +1,233 @@
 import React from 'react';
+import { PremiumFooter } from '../components/layout/PremiumFooter';
+import { PremiumNavbar } from '../components/layout/PremiumNavbar';
 
-/**
- * VORTIC.WEBSITE OFFICIAL PREMIUM LANDING PAGE (Next.js App Router)
- * 
- * Upgraded Features:
- * - Brand text updated from "Vortic.website" to "vortic" in the navbar.
- * - Custom, ultra-premium energetic SVG Vortex logo designed to look extremely unique (Unicorn-Grade Brand).
- * - Implements rich visual spacing, responsive layout reasoning, and conversion-trigger CTAs.
- */
+const infrastructure = ['Next.js 16', 'Prisma', 'PostgreSQL', 'Redis', 'Supabase-ready', 'Vercel-ready'];
+
+const templateHighlights = [
+  ['AI Startup OS', 'Investor-grade SaaS hero, proof, benefits, and lead capture.', 'ai_startup_os'],
+  ['Luxury Real Estate', 'Premium development showcase for private tour bookings.', 'realestate_luxury_condo'],
+  ['Medical Clinic', 'Trust-first patient booking flow with secure form capture.', 'medical_clinic'],
+  ['Local Services', 'Quote-ready funnels for contractors, clinics, and trades.', 'roofing_contractor'],
+  ['Creator Media Kit', 'Sponsor-ready creator and podcast landing page structure.', 'podcaster_media'],
+  ['Restaurant Launch', 'Menu-first hospitality page for bookings and orders.', 'restaurant_menu'],
+];
+
+const useCases = [
+  { icon: '🚀', title: 'SaaS launches', text: 'Ship product pages, waitlists, demo funnels, and feature explainers without waiting on engineering.' },
+  { icon: '🛒', title: 'Performance ecommerce', text: 'Create product funnels with proof, benefits, urgency, and lead/order capture for paid traffic.' },
+  { icon: '🏢', title: 'Agencies & consultants', text: 'Package service offers, case narratives, and intake flows into polished client-winning pages.' },
+  { icon: '📍', title: 'Local businesses', text: 'Convert high-intent visitors into calls, bookings, quotes, and consultations.' },
+];
+
+const faqs = [
+  ['Can I start from a template?', 'Yes. The marketplace includes 165 professional schemas and the editor can open any template directly with /editor?template=template_id.'],
+  ['Does it work without a database locally?', 'Yes. Critical APIs include preview fallback behavior, while durable persistence requires PostgreSQL and Redis.'],
+  ['Is custom HTML safe?', 'User-authored HTML is sanitized, unsafe URL schemes are blocked, and sandboxed embeds are isolated from the parent application.'],
+  ['What makes Vext™ different?', 'Vext™ treats visual pages as schema-driven AST documents that can be rendered, optimized, published, and measured consistently.'],
+];
+
+function Metric({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 text-center shadow-2xl shadow-black/10 backdrop-blur-xl">
+      <p className="text-3xl font-black text-white">{value}</p>
+      <p className="mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{label}</p>
+    </div>
+  );
+}
+
+function ProductPreview() {
+  return (
+    <div className="relative mx-auto mt-12 max-w-6xl px-4">
+      <div className="absolute inset-0 -z-10 rounded-[3rem] bg-gradient-to-tr from-indigo-500/20 via-fuchsia-500/10 to-cyan-500/20 blur-3xl" />
+      <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/50">
+        <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.035] px-5 py-3">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded-full bg-rose-400" />
+            <span className="h-3 w-3 rounded-full bg-amber-400" />
+            <span className="h-3 w-3 rounded-full bg-emerald-400" />
+          </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">Vortic Visual Workspace</p>
+        </div>
+        <div className="grid min-h-[420px] lg:grid-cols-[250px_1fr_280px]">
+          <aside className="hidden border-r border-white/10 bg-slate-950/80 p-4 lg:block">
+            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Elements</p>
+            {['Hero Section', 'Grid', 'Lead Form', 'CTA Button', 'Template Library'].map((item) => (
+              <div key={item} className="mt-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-xs font-bold text-slate-300">{item}</div>
+            ))}
+          </aside>
+          <section className="bg-[radial-gradient(#1e293b_1px,transparent_1px)] p-5 [background-size:24px_24px]">
+            <div className="mx-auto max-w-2xl rounded-[1.6rem] border border-white/10 bg-white p-8 text-slate-950 shadow-2xl">
+              <div className="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600">Template applied</div>
+              <h3 className="mt-5 text-4xl font-black tracking-tight">Launch pages that feel custom-built.</h3>
+              <p className="mt-4 text-sm leading-7 text-slate-600">Choose a premium schema, edit visually, capture leads, and publish a polished page with responsive sections already included.</p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {['Proof', 'Benefits', 'Form'].map((item) => <div key={item} className="rounded-2xl bg-slate-100 p-4 text-xs font-black text-slate-600">{item}</div>)}
+              </div>
+            </div>
+          </section>
+          <aside className="hidden border-l border-white/10 bg-slate-950/80 p-4 lg:block">
+            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Inspector</p>
+            {['Typography', 'Spacing', 'Visibility', 'Actions'].map((item) => (
+              <div key={item} className="mt-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-xs font-bold text-slate-300">{item}</div>
+            ))}
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PublicHomepage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden font-sans relative selection:bg-indigo-500 selection:text-white">
-      
-      {/* Background glowing gradients */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-indigo-900/15 via-transparent to-transparent blur-3xl pointer-events-none" />
-      <div className="absolute top-[400px] right-0 w-[400px] h-[400px] bg-indigo-500/5 blur-3xl pointer-events-none rounded-full" />
-      <div className="absolute top-[800px] left-0 w-[400px] h-[400px] bg-purple-500/5 blur-3xl pointer-events-none rounded-full" />
+    <div className="min-h-screen overflow-x-hidden bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+      <PremiumNavbar />
 
-      {/* 1. GLOBAL PREMIUM NAVBAR WITH ULTRA-UNIQUE SVG LOGO */}
-      <header className="h-16 border-b border-slate-900 bg-slate-950/50 backdrop-blur-xl fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 md:px-12">
-        <div className="flex items-center space-x-3">
-          
-          {/* Custom Energetic SVG Vortex Logo (Extremely Unique Design) */}
-          <div className="relative w-10 h-10 flex items-center justify-center group cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition-opacity" />
-            <svg 
-              className="w-8 h-8 relative z-10 transform group-hover:rotate-180 transition-transform duration-700 ease-out" 
-              viewBox="0 0 100 100" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient id="vortexGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#a855f7" />
-                </linearGradient>
-                <linearGradient id="vortexGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ec4899" />
-                  <stop offset="100%" stopColor="#f43f5e" />
-                </linearGradient>
-              </defs>
-              {/* Outer swirl */}
-              <path d="M50 10C72.0914 10 90 27.9086 90 50C90 62.1152 84.6063 72.9702 76 80.2487M50 90C27.9086 90 10 72.0914 10 50C10 40.548 13.2796 31.8601 18.7846 25" stroke="url(#vortexGrad1)" strokeWidth="8" strokeLinecap="round" />
-              {/* Inner energetic swirl */}
-              <path d="M50 25C63.8071 25 75 36.1929 75 50C75 56.5182 72.5117 62.4552 68.4312 66.928M50 75C36.1929 75 25 63.8071 25 50C25 45.419 26.2346 41.1264 28.3888 37.4583" stroke="url(#vortexGrad2)" strokeWidth="6" strokeLinecap="round" />
-              {/* Central glowing core node */}
-              <circle cx="50" cy="50" r="10" fill="#ffffff" className="animate-pulse" />
-            </svg>
-          </div>
-
-          <div>
-            <h1 className="text-base font-black tracking-tight text-white leading-none">vortic</h1>
-            <span className="text-[8px] text-indigo-400 font-bold uppercase tracking-widest mt-0.5 block">Vext™ compiler</span>
-          </div>
-        </div>
-
-        {/* Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-8 text-[11px] font-bold text-slate-400 tracking-wider uppercase">
-          <a href="#features" className="hover:text-white transition-colors">Features</a>
-          <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
-          <a href="/contact" className="hover:text-white transition-colors">Support</a>
-        </nav>
-
-        {/* Action Button */}
-        <a 
-          href="/editor" 
-          className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] uppercase tracking-wider px-4 py-2 rounded-xl transition-all shadow-lg shadow-indigo-600/20"
-        >
-          Open Editor ➡️
-        </a>
-      </header>
-
-      {/* 2. HERO SECTION */}
-      <section className="pt-32 pb-20 px-6 text-center relative z-10">
-        <div className="max-w-4xl mx-auto space-y-6">
-          
-          {/* Eyebrow Badge */}
-          <div className="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 px-3.5 py-1.5 rounded-full shadow-inner animate-fade-in">
-            <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-ping" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">
-              Vext™ Engine compilation Live
-            </span>
-          </div>
-
-          {/* Hero Main Headline */}
-          <h2 className="text-4xl md:text-6xl font-black bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent tracking-tight leading-[1.1] max-w-3xl mx-auto">
-            Compile Gorgeous Landing Pages on the Edge
-          </h2>
-
-          {/* Hero Subtext */}
-          <p className="text-sm md:text-base text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium">
-            Stop losing customers to slow, bloated React loaders. We compile your visual designs into raw, hyper-optimized static files distributed globally in under 10ms.
-          </p>
-
-          {/* Hero Call-To-Actions */}
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 pt-4">
-            <a 
-              href="/editor" 
-              className="w-full sm:w-auto bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-xl shadow-indigo-500/20 hover:opacity-95 transition-all text-center"
-            >
-              🚀 Launch Visual Editor
-            </a>
-            <a 
-              href="/pricing" 
-              className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs px-6 py-3.5 rounded-xl border border-slate-800 transition-all text-center"
-            >
-              View Pricing Packages
-            </a>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 3. LOGOS TRUST BAR */}
-      <section className="py-8 bg-slate-950 border-y border-slate-900/60 relative z-10 text-center">
-        <div className="max-w-6xl mx-auto px-6">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 mb-2">
-            TRUSTED BY PERFORMANCE MARKETERS & SaaS TEAMS WORLDWIDE
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-30 grayscale hover:opacity-50 transition-opacity pt-2">
-            <span className="text-xs font-black tracking-widest">Stripe</span>
-            <span className="text-xs font-black tracking-widest">Framer</span>
-            <span className="text-xs font-black tracking-widest">Supabase</span>
-            <span className="text-xs font-black tracking-widest">Vercel</span>
-            <span className="text-xs font-black tracking-widest">PostgreSQL</span>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. PERFORMANCE METRICS HUD */}
-      <section className="py-12 bg-slate-950 relative z-10">
-        <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 text-center space-y-1">
-            <div className="text-2xl font-black text-indigo-400">&lt; 10ms</div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Average Edge TTFB</div>
-          </div>
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 text-center space-y-1">
-            <div className="text-2xl font-black text-indigo-400">100/100</div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Lighthouse Score Guarantee</div>
-          </div>
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 text-center space-y-1">
-            <div className="text-2xl font-black text-indigo-400">300+</div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Anycast Edge CDN POPs</div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. FEATURES DETAILS SECTION */}
-      <section id="features" className="py-20 bg-slate-950 relative z-10 text-left">
-        <div className="max-w-6xl mx-auto px-6 space-y-12">
-          
-          <div className="text-center space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Under the Hood</span>
-            <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">The Most Advanced SaaS Builder Core ever Compiled</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
-            {/* Feature 1 */}
-            <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 space-y-4 hover:border-slate-700 transition-all">
-              <span className="text-2xl">⚡</span>
-              <h4 className="text-sm font-bold text-white">Vext™ AST Compilation</h4>
-              <p className="text-xs text-slate-400 leading-normal">
-                Visual layouts are translated into an Abstract Syntax Tree (AST), extracting atomic CSS and rendering single-payload raw HTML. Bypasses bulky JS runtimes.
-              </p>
+      <main>
+        <section className="relative px-6 pb-20 pt-32 text-center md:pt-40">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,#4f46e544,transparent_34rem),radial-gradient(circle_at_80%_15%,#ec489933,transparent_28rem)]" />
+          <div className="relative z-10 mx-auto max-w-5xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-indigo-300 shadow-inner">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
+              165 templates · Visual editor · Edge publishing
             </div>
-
-            {/* Feature 2 */}
-            <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 space-y-4 hover:border-slate-700 transition-all">
-              <span className="text-2xl">🛡️</span>
-              <h4 className="text-sm font-bold text-white">Capability-Based Sandbox</h4>
-              <p className="text-xs text-slate-400 leading-normal">
-                Securely embed custom HTML, scripts, and third-party widgets. Our runtime permissions sandbox restricts access, preventing XSS and session hijacking.
-              </p>
+            <h1 className="mt-7 bg-gradient-to-r from-white via-indigo-100 to-slate-400 bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-7xl md:leading-[0.95]">
+              Build professional landing pages at global product quality.
+            </h1>
+            <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-400 md:text-lg">
+              Vortic is a no-code website operating system for launching premium pages from templates, editing them visually, securing every submission, and publishing with the Vext™ compiler workflow.
+            </p>
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a href="/editor" className="w-full rounded-2xl bg-white px-7 py-4 text-xs font-black uppercase tracking-wider text-slate-950 shadow-2xl shadow-white/10 transition hover:bg-indigo-100 sm:w-auto">
+                Open Visual Editor
+              </a>
+              <a href="/templates" className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-7 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:border-indigo-400/60 hover:bg-indigo-500/10 sm:w-auto">
+                Browse Templates
+              </a>
             </div>
-
-            {/* Feature 3 */}
-            <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 space-y-4 hover:border-slate-700 transition-all">
-              <span className="text-2xl">👥</span>
-              <h4 className="text-sm font-bold text-white">P2P Vector-Clock CRDTs</h4>
-              <p className="text-xs text-slate-400 leading-normal">
-                Co-author with zero lag. Our CRDT sync protocol compresses mutations, and automatically resolves offline modifications without data override conflicts.
-              </p>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              <Metric value="165" label="Professional templates" />
+              <Metric value="0" label="Production audit vulns" />
+              <Metric value="1" label="Unified builder OS" />
             </div>
-
           </div>
+          <ProductPreview />
+        </section>
 
-        </div>
-      </section>
+        <section className="border-y border-slate-900 bg-slate-950 px-6 py-7 text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.26em] text-slate-600">Built with modern infrastructure</p>
+          <div className="mx-auto mt-4 flex max-w-5xl flex-wrap items-center justify-center gap-4 text-xs font-black uppercase tracking-widest text-slate-500">
+            {infrastructure.map((item) => <span key={item} className="rounded-full border border-slate-900 bg-slate-900/50 px-4 py-2">{item}</span>)}
+          </div>
+        </section>
 
-      {/* 6. CONVERSION ACCELERATION BANNER */}
-      <section className="py-16 bg-gradient-to-b from-slate-950 to-slate-900 relative z-10 text-center">
-        <div className="max-w-3xl mx-auto px-6 space-y-6">
-          <h3 className="text-2xl md:text-3xl font-black text-white">Ready to Double Your Ad Conversions?</h3>
-          <p className="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
-            Create your account in under 10 seconds. Select your target vertical template, let our AI Co-Pilot adapt it, and publish globally instantly.
-          </p>
-          <a 
-            href="/editor" 
-            className="inline-flex bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs px-8 py-3.5 rounded-xl shadow-lg transition-all"
-          >
-            Start Building Weightless Pages Now ➡️
-          </a>
-        </div>
-      </section>
+        <section id="product" className="px-6 py-24">
+          <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-400">Product system</p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-white md:text-5xl">Everything needed to move from idea to published page.</h2>
+              <p className="mt-4 text-sm leading-7 text-slate-400">A complete workflow: choose a template, customize sections, inspect styles, capture leads, track analytics, and publish safely.</p>
+            </div>
+            <div className="mt-12 grid gap-5 md:grid-cols-3">
+              {[
+                ['Visual Builder', 'Schema-driven canvas with blocks, responsive controls, undo/redo, and local draft recovery.'],
+                ['Vext™ Runtime', 'Publishing, minification, analytics ingestion, Redis fallback, and hardened rendering paths.'],
+                ['Template OS', '165 ready-to-use templates mapped to real industries, offers, and conversion flows.'],
+              ].map(([title, text]) => (
+                <article key={title} className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-7 shadow-2xl shadow-black/10 transition hover:border-indigo-500/50">
+                  <h3 className="text-lg font-black text-white">{title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-400">{text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      {/* 7. SECURE FOOTER */}
-      <footer className="py-12 bg-slate-900/40 border-t border-slate-900 text-center relative z-10 text-[11px] text-slate-500 space-y-4">
-        <div className="flex justify-center space-x-6">
-          <a href="/privacy" className="hover:text-slate-300">Privacy Policy</a>
-          <a href="/terms" className="hover:text-slate-300">Terms of Service</a>
-          <a href="/refund" className="hover:text-slate-300">Refund Policy</a>
-        </div>
-        <p>© 2026 Vortic.website. All rights reserved. Vext™ is a registered trademark of Vortic.</p>
-      </footer>
+        <section className="bg-slate-900/20 px-6 py-24">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-400">Template showcase</p>
+                <h2 className="mt-3 text-3xl font-black tracking-tight text-white md:text-5xl">Start from a page that already knows the market.</h2>
+              </div>
+              <a href="/templates" className="rounded-2xl bg-white px-5 py-3 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-indigo-100">View all templates</a>
+            </div>
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {templateHighlights.map(([title, text, id]) => (
+                <a key={id} href={`/editor?template=${id}`} className="group rounded-[2rem] border border-slate-800 bg-slate-950 p-6 shadow-2xl shadow-black/10 transition hover:-translate-y-1 hover:border-indigo-500/60">
+                  <div className="h-28 rounded-3xl bg-gradient-to-tr from-indigo-500/25 via-fuchsia-500/15 to-cyan-500/20 ring-1 ring-white/10" />
+                  <h3 className="mt-5 text-lg font-black text-white group-hover:text-indigo-200">{title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-400">{text}</p>
+                  <p className="mt-4 text-[10px] font-black uppercase tracking-wider text-indigo-400">Use template →</p>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
 
+        <section id="use-cases" className="px-6 py-24">
+          <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-400">Use cases</p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-white md:text-5xl">Built for teams that need speed and trust.</h2>
+            </div>
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+              {useCases.map((item) => (
+                <article key={item.title} className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-6">
+                  <p className="text-3xl">{item.icon}</p>
+                  <h3 className="mt-4 text-base font-black text-white">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-400">{item.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-slate-900/20 px-6 py-24">
+          <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2 lg:items-center">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-400">Security & performance</p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-white md:text-5xl">A serious foundation for public pages.</h2>
+              <p className="mt-5 text-sm leading-8 text-slate-400">Vortic includes schema sanitization, HTML hardening, safe URL validation, rate limiting, honeypot protection, analytics fallback, and published-page responsive rendering.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {['XSS sanitizer', 'Safe URL validation', 'Rate limiting', 'Honeypot forms', 'Preview fallbacks', 'Responsive renderer'].map((item) => (
+                <div key={item} className="rounded-2xl border border-slate-800 bg-slate-950 p-5 text-sm font-black text-slate-200">✅ {item}</div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 py-24">
+          <div className="mx-auto max-w-4xl">
+            <div className="text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-400">FAQ</p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-white md:text-5xl">Questions teams ask before building.</h2>
+            </div>
+            <div className="mt-10 space-y-4">
+              {faqs.map(([question, answer]) => (
+                <details key={question} className="group rounded-3xl border border-white/10 bg-white/[0.035] p-6 text-left">
+                  <summary className="cursor-pointer list-none text-base font-black text-white">{question}</summary>
+                  <p className="mt-4 text-sm leading-7 text-slate-400">{answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 pb-24">
+          <div className="mx-auto max-w-5xl rounded-[2rem] border border-indigo-400/20 bg-gradient-to-tr from-indigo-500/20 via-fuchsia-500/10 to-cyan-500/20 p-8 text-center shadow-2xl shadow-indigo-950/20 md:p-12">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-200">Ready to build?</p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight text-white md:text-5xl">Pick a template, customize visually, and publish faster.</h2>
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <a href="/templates" className="rounded-2xl bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-indigo-100">Browse templates</a>
+              <a href="/editor" className="rounded-2xl border border-white/10 bg-slate-950 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:border-white/30">Open editor</a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <PremiumFooter />
     </div>
   );
 }
