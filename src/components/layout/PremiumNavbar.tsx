@@ -8,7 +8,7 @@ const navLinks = [
   { label: 'Support', href: '/contact' },
 ];
 
-function VorticLogo() {
+export function VorticLogo() {
   return (
     <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-950 ring-1 ring-white/10 sm:h-10 sm:w-10">
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 opacity-40 blur-md" />

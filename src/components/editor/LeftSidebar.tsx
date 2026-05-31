@@ -12,6 +12,7 @@ interface TemplateListItem {
   description: string;
   category: string;
   previewImage?: string;
+  previewPage?: string;
 }
 
 interface SidebarItem {
@@ -359,12 +360,15 @@ export const LeftSidebar: React.FC = () => {
                 onClick={() => handleApplyTemplate(template.templateId)}
                 className="w-full overflow-hidden rounded-xl border border-gray-100 bg-white text-left transition hover:border-indigo-500 hover:shadow-sm disabled:cursor-wait disabled:opacity-60"
               >
-                <img
-                  src={template.previewImage || `/api/website/template/preview?templateId=${encodeURIComponent(template.templateId)}`}
-                  alt={`${template.name} preview`}
-                  loading="lazy"
-                  className="aspect-video w-full object-cover"
-                />
+                <div className="aspect-video w-full overflow-hidden bg-white">
+                  <iframe
+                    src={template.previewPage || `/templates/preview/${encodeURIComponent(template.templateId)}`}
+                    title={`${template.name} live preview`}
+                    loading="lazy"
+                    className="h-full w-full border-0"
+                    sandbox="allow-scripts"
+                  />
+                </div>
                 <div className="p-3">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-xs font-black text-gray-900">{template.name}</h3>

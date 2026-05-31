@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
       template: {
         ...template,
         previewImage: `/api/website/template/preview?templateId=${encodeURIComponent(template.templateId)}`,
+        previewPage: `/templates/preview/${encodeURIComponent(template.templateId)}`,
       },
     });
   }
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest) {
     description: template.description,
     category: template.category,
     previewImage: `/api/website/template/preview?templateId=${encodeURIComponent(template.templateId)}`,
+    previewPage: `/templates/preview/${encodeURIComponent(template.templateId)}`,
   }));
 
   return NextResponse.json({

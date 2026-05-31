@@ -8,6 +8,7 @@ import { RightPanel } from './RightPanel';
 import { PageBuilderSchema } from '../../types/builder';
 import { toast } from '../ui/ToastProvider';
 import { CommandPalette } from './CommandPalette';
+import { VorticLogo } from '../layout/PremiumNavbar';
 
 // Mock Initial Landing Page Builder Schema
 const MOCK_INITIAL_SCHEMA: PageBuilderSchema = {
@@ -435,12 +436,10 @@ export const VisualEditor: React.FC = () => {
       {/* Top Navbar */}
       <header className="h-14 border-b border-slate-900 bg-slate-950 flex items-center justify-between px-4 z-20">
         <div className="flex items-center space-x-2.5">
-          <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-black text-sm w-8 h-8 rounded-lg flex items-center justify-center shadow-md">
-            V
-          </div>
+          <VorticLogo />
           <div className="text-left">
             <h1 className="text-xs font-black text-white leading-none">vortic workspace</h1>
-            <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider">Vext™ compiler</span>
+            <span className="text-[9px] text-indigo-300 font-black uppercase tracking-[0.22em]">Vext™ Engine</span>
           </div>
         </div>
 

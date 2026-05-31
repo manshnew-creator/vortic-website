@@ -77,12 +77,15 @@ export default function TemplatesMarketplacePage() {
                     key={template.templateId}
                     className="group overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/55 shadow-2xl shadow-black/10 transition hover:-translate-y-1 hover:border-indigo-500/60 hover:bg-slate-900"
                   >
-                    <img
-                      src={`/api/website/template/preview?templateId=${encodeURIComponent(template.templateId)}`}
-                      alt={`${template.name} template preview`}
-                      loading="lazy"
-                      className="aspect-video w-full object-cover"
-                    />
+                    <div className="aspect-video w-full overflow-hidden bg-white">
+                      <iframe
+                        src={`/templates/preview/${encodeURIComponent(template.templateId)}`}
+                        title={`${template.name} live preview`}
+                        loading="lazy"
+                        className="h-full w-full border-0"
+                        sandbox="allow-scripts"
+                      />
+                    </div>
                     <div className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div>

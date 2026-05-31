@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TEMPLATES_REGISTRY } from '../../../../../lib/theme/templates';
+import { BaseBlock, PageBuilderSchema } from '../../../../../types/builder';
 
 const escapeXml = (value: string) =>
   value
@@ -9,8 +10,41 @@ const escapeXml = (value: string) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
 
-const clampText = (value: string, max = 54) =>
+const stripHtml = (value: string) =>
+  value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const clampText = (value: string, max = 58) =>
   value.length > max ? `${value.slice(0, max - 1)}…` : value;
+
+function getTemplate(templateId: string) {
+  return TEMPLATES_REGISTRY[templateId] || Object.values(TEMPLATES_REGISTRY).find((template) => template.templateId === templateId);
+}
+
+function firstBlock(schema: PageBuilderSchema, predicate: (block: BaseBlock) => boolean) {
+  return Object.values(schema.blocks).find(predicate);
+}
+
+function textFromBlock(block?: BaseBlock) {
+  if (!block) return '';
+  if (typeof block.props.text === 'string') return block.props.text;
+  if (typeof block.props.htmlContent === 'string') return stripHtml(block.props.htmlContent);
+  if (typeof block.props.label === 'string') return block.props.label;
+  return block.name || '';
+}
+
+function collectCardTitles(schema: PageBuilderSchema) {
+  const headings = Object.values(schema.blocks)
+    .filter((block) => block.type === 'heading' && block.props?.level !== 1)
+    .map((block) => textFromBlock(block))
+    .filter(Boolean)
+    .slice(0, 3);
+
+  if (headings.length >= 3) return headings;
+  return [...headings, 'Proof-driven layout', 'Conversion sections', 'Lead capture'].slice(0, 3);
+}
 
 function hexToRgb(hex: string) {
   const normalized = hex.replace('#', '').trim();
@@ -31,95 +65,110 @@ function luminance(hex: string) {
 }
 
 function createSvg(templateId: string) {
-  const template = TEMPLATES_REGISTRY[templateId];
+  const template = getTemplate(templateId);
   if (!template) return null;
 
-  const theme = template.schema.theme;
+  const schema = template.schema;
+  const theme = schema.theme;
   const primary = theme.primaryColor || '#6366f1';
   const secondary = theme.secondaryColor || '#ec4899';
   const background = theme.backgroundColor || '#020617';
-  const text = luminance(background) > 0.52 ? '#0f172a' : '#ffffff';
-  const muted = luminance(background) > 0.52 ? '#475569' : '#cbd5e1';
+  const isLight = luminance(background) > 0.56;
+  const pageBg = isLight ? '#f8fafc' : background;
+  const cardBg = isLight ? '#ffffff' : '#0f172a';
+  const text = isLight ? '#0f172a' : '#ffffff';
+  const muted = isLight ? '#475569' : '#cbd5e1';
+  const border = isLight ? '#e2e8f0' : '#1e293b';
   const category = template.category.replace(/_/g, ' ');
-  const title = clampText(template.name, 46);
-  const desc = clampText(template.description, 92);
-  const id = template.templateId.replace(/[^a-zA-Z0-9_-]/g, '');
+  const heroHeading = clampText(textFromBlock(firstBlock(schema, (block) => block.type === 'heading' && (block.props?.level === 1 || block.id.toLowerCase().includes('hero')))) || template.name, 48);
+  const heroText = clampText(textFromBlock(firstBlock(schema, (block) => block.type === 'text' && Boolean(block.parentId?.toLowerCase().includes('hero')))) || template.description, 96);
+  const cta = clampText(textFromBlock(firstBlock(schema, (block) => block.type === 'button' || block.type === 'submit-button')) || 'Use template', 24);
+  const cards = collectCardTitles(schema).map((item) => clampText(item, 26));
+  const safeId = template.templateId.replace(/[^a-zA-Z0-9_-]/g, '');
 
   return `
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title-${id} desc-${id}">
-  <title id="title-${id}">${escapeXml(template.name)} template preview</title>
-  <desc id="desc-${id}">${escapeXml(template.description)}</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title-${safeId} desc-${safeId}">
+  <title id="title-${safeId}">${escapeXml(template.name)} real template preview</title>
+  <desc id="desc-${safeId}">${escapeXml(template.description)}</desc>
   <defs>
-    <linearGradient id="bg-${id}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${background}"/>
-      <stop offset="0.52" stop-color="#020617"/>
-      <stop offset="1" stop-color="${primary}" stop-opacity="0.55"/>
+    <linearGradient id="shell-${safeId}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#020617"/>
+      <stop offset="0.55" stop-color="#0f1029"/>
+      <stop offset="1" stop-color="${primary}" stop-opacity="0.88"/>
     </linearGradient>
-    <radialGradient id="orb-a-${id}" cx="25%" cy="20%" r="60%">
-      <stop offset="0" stop-color="${primary}" stop-opacity="0.9"/>
+    <linearGradient id="accent-${safeId}" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="${primary}"/>
+      <stop offset="1" stop-color="${secondary}"/>
+    </linearGradient>
+    <radialGradient id="glowA-${safeId}" cx="18%" cy="10%" r="64%">
+      <stop offset="0" stop-color="${primary}" stop-opacity="0.42"/>
       <stop offset="1" stop-color="${primary}" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="orb-b-${id}" cx="82%" cy="18%" r="55%">
-      <stop offset="0" stop-color="${secondary}" stop-opacity="0.9"/>
+    <radialGradient id="glowB-${safeId}" cx="88%" cy="20%" r="58%">
+      <stop offset="0" stop-color="${secondary}" stop-opacity="0.38"/>
       <stop offset="1" stop-color="${secondary}" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="card-${id}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0.055"/>
-    </linearGradient>
-    <filter id="blur-${id}" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="34"/>
+    <filter id="shadow-${safeId}" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="30" stdDeviation="26" flood-color="#000000" flood-opacity="0.38"/>
     </filter>
-    <filter id="shadow-${id}" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#000000" flood-opacity="0.35"/>
-    </filter>
+    <clipPath id="clip-${safeId}">
+      <rect x="82" y="70" width="1036" height="535" rx="44"/>
+    </clipPath>
   </defs>
 
-  <rect width="1200" height="675" rx="48" fill="url(#bg-${id})"/>
-  <rect width="1200" height="675" rx="48" fill="url(#orb-a-${id})"/>
-  <rect width="1200" height="675" rx="48" fill="url(#orb-b-${id})"/>
-  <circle cx="1050" cy="540" r="260" fill="${secondary}" opacity="0.13" filter="url(#blur-${id})"/>
-  <circle cx="120" cy="600" r="250" fill="${primary}" opacity="0.16" filter="url(#blur-${id})"/>
+  <rect width="1200" height="675" rx="48" fill="url(#shell-${safeId})"/>
+  <rect width="1200" height="675" rx="48" fill="url(#glowA-${safeId})"/>
+  <rect width="1200" height="675" rx="48" fill="url(#glowB-${safeId})"/>
 
-  <g opacity="0.22">
-    <path d="M0 130 C180 50 315 230 500 130 S830 20 1200 150" fill="none" stroke="#ffffff" stroke-width="2"/>
-    <path d="M0 505 C220 420 410 620 620 500 S930 380 1200 500" fill="none" stroke="#ffffff" stroke-width="2"/>
-    <path d="M80 0 L1180 675" stroke="#ffffff" stroke-width="1" opacity="0.25"/>
-    <path d="M330 0 L1200 520" stroke="#ffffff" stroke-width="1" opacity="0.18"/>
+  <g filter="url(#shadow-${safeId})">
+    <rect x="82" y="70" width="1036" height="535" rx="44" fill="#0b1020" stroke="#ffffff" stroke-opacity="0.16"/>
   </g>
 
-  <g filter="url(#shadow-${id})">
-    <rect x="82" y="78" width="1036" height="519" rx="42" fill="url(#card-${id})" stroke="#ffffff" stroke-opacity="0.18"/>
-    <rect x="112" y="108" width="976" height="459" rx="32" fill="#020617" fill-opacity="0.32" stroke="#ffffff" stroke-opacity="0.10"/>
-  </g>
+  <g clip-path="url(#clip-${safeId})">
+    <rect x="82" y="70" width="1036" height="535" rx="44" fill="${pageBg}"/>
+    <circle cx="970" cy="130" r="240" fill="${primary}" opacity="0.12"/>
+    <circle cx="180" cy="560" r="260" fill="${secondary}" opacity="0.10"/>
 
-  <g transform="translate(150 146)">
-    <rect x="0" y="0" width="220" height="42" rx="21" fill="${primary}" fill-opacity="0.20" stroke="${primary}" stroke-opacity="0.38"/>
-    <text x="22" y="27" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="15" font-weight="900" letter-spacing="2.2" fill="${text}">${escapeXml(category.toUpperCase())}</text>
+    <g transform="translate(122 104)">
+      <rect x="0" y="0" width="956" height="58" rx="22" fill="${cardBg}" opacity="0.94" stroke="${border}"/>
+      <circle cx="32" cy="29" r="13" fill="url(#accent-${safeId})"/>
+      <text x="58" y="36" font-family="Inter, ui-sans-serif, system-ui, Arial" font-size="18" font-weight="950" fill="${text}">${escapeXml(template.name)}</text>
+      <rect x="760" y="15" width="154" height="30" rx="15" fill="${primary}" opacity="0.16"/>
+      <text x="788" y="35" font-family="Inter, ui-sans-serif, system-ui, Arial" font-size="12" font-weight="900" letter-spacing="1.4" fill="${primary}">${escapeXml(category.toUpperCase())}</text>
+    </g>
 
-    <text x="0" y="124" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="62" font-weight="950" letter-spacing="-3.2" fill="${text}">${escapeXml(title)}</text>
-    <text x="0" y="176" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="22" font-weight="600" fill="${muted}">${escapeXml(desc)}</text>
+    <g transform="translate(150 215)">
+      <rect x="0" y="0" width="205" height="36" rx="18" fill="${primary}" fill-opacity="0.14" stroke="${primary}" stroke-opacity="0.28"/>
+      <text x="20" y="24" font-family="Inter, ui-sans-serif, system-ui, Arial" font-size="13" font-weight="950" letter-spacing="2" fill="${primary}">${escapeXml(category.toUpperCase())}</text>
+      <text x="0" y="104" font-family="Inter, ui-sans-serif, system-ui, Arial" font-size="48" font-weight="950" letter-spacing="-2.4" fill="${text}">${escapeXml(heroHeading)}</text>
+      <text x="0" y="150" font-family="Inter, ui-sans-serif, system-ui, Arial" font-size="18" font-weight="600" fill="${muted}">${escapeXml(heroText)}</text>
+      <rect x="0" y="190" width="178" height="50" rx="18" fill="url(#accent-${safeId})"/>
+      <text x="28" y="222" font-family="Inter, ui-sans-serif, system-ui, Arial" font-size="15" font-weight="950" fill="#ffffff">${escapeXml(cta)}</text>
+    </g>
 
-    <g transform="translate(0 245)">
-      <rect x="0" y="0" width="194" height="56" rx="18" fill="${primary}"/>
-      <text x="28" y="35" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="900" fill="#ffffff">Use template</text>
-      <rect x="214" y="0" width="176" height="56" rx="18" fill="#ffffff" fill-opacity="0.09" stroke="#ffffff" stroke-opacity="0.18"/>
-      <text x="242" y="35" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="900" fill="${text}">Preview</text>
+    <g transform="translate(770 215)">
+      <rect x="0" y="0" width="268" height="300" rx="34" fill="${cardBg}" opacity="0.96" stroke="${border}"/>
+      <rect x="28" y="28" width="212" height="36" rx="13" fill="url(#accent-${safeId})" opacity="0.92"/>
+      <rect x="28" y="88" width="160" height="16" rx="8" fill="${text}" opacity="0.82"/>
+      <rect x="28" y="118" width="210" height="10" rx="5" fill="${muted}" opacity="0.35"/>
+      <rect x="28" y="140" width="180" height="10" rx="5" fill="${muted}" opacity="0.28"/>
+      <rect x="28" y="184" width="92" height="70" rx="18" fill="${primary}" opacity="0.22"/>
+      <rect x="142" y="184" width="92" height="70" rx="18" fill="${secondary}" opacity="0.22"/>
+    </g>
+
+    <g transform="translate(150 530)">
+      ${cards.map((card, index) => `
+      <g transform="translate(${index * 215} 0)">
+        <rect x="0" y="0" width="188" height="72" rx="22" fill="${cardBg}" opacity="0.94" stroke="${border}"/>
+        <circle cx="28" cy="36" r="10" fill="${index === 0 ? primary : index === 1 ? secondary : '#22d3ee'}"/>
+        <text x="48" y="32" font-family="Inter, ui-sans-serif, system-ui, Arial" font-size="13" font-weight="900" fill="${text}">${escapeXml(card)}</text>
+        <rect x="48" y="44" width="95" height="7" rx="3.5" fill="${muted}" opacity="0.30"/>
+      </g>`).join('')}
     </g>
   </g>
 
-  <g transform="translate(760 170)">
-    <rect x="0" y="0" width="270" height="320" rx="34" fill="#ffffff" fill-opacity="0.10" stroke="#ffffff" stroke-opacity="0.18"/>
-    <rect x="26" y="28" width="218" height="40" rx="14" fill="${primary}" fill-opacity="0.9"/>
-    <rect x="26" y="92" width="160" height="18" rx="9" fill="#ffffff" fill-opacity="0.7"/>
-    <rect x="26" y="125" width="212" height="12" rx="6" fill="#ffffff" fill-opacity="0.25"/>
-    <rect x="26" y="150" width="184" height="12" rx="6" fill="#ffffff" fill-opacity="0.20"/>
-    <rect x="26" y="196" width="92" height="72" rx="20" fill="${secondary}" fill-opacity="0.55"/>
-    <rect x="136" y="196" width="92" height="72" rx="20" fill="${primary}" fill-opacity="0.45"/>
-  </g>
-
-  <g transform="translate(150 540)">
-    <text x="0" y="0" font-family="Inter, ui-sans-serif, system-ui" font-size="13" font-weight="900" letter-spacing="2" fill="${muted}">VORTIC.WEBSITE / VEXT™ TEMPLATE SYSTEM</text>
+  <g transform="translate(82 632)">
+    <text x="0" y="0" font-family="Inter, ui-sans-serif, system-ui, Arial" font-size="13" font-weight="950" letter-spacing="2.4" fill="#cbd5e1" opacity="0.72">VORTIC.WEBSITE / REAL SCHEMA PREVIEW</text>
   </g>
 </svg>`.trim();
 }
@@ -136,6 +185,7 @@ export async function GET(req: NextRequest) {
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
       'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=604800',
+      'Content-Disposition': 'inline',
     },
   });
 }
