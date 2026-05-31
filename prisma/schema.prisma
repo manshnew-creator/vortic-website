@@ -70,6 +70,7 @@ model Website {
   updatedAt        DateTime      @updatedAt
 
   pages            Page[]
+  leads            Lead[]
   domainConfigs    DomainConfig[]
   analyticsRecords AnalyticsRecord[]
   blocks           GlobalBlock[]
