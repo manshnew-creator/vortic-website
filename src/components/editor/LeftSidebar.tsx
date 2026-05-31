@@ -11,6 +11,7 @@ interface TemplateListItem {
   name: string;
   description: string;
   category: string;
+  previewImage?: string;
 }
 
 interface SidebarItem {
@@ -356,14 +357,22 @@ export const LeftSidebar: React.FC = () => {
                 type="button"
                 disabled={isApplyingTemplate}
                 onClick={() => handleApplyTemplate(template.templateId)}
-                className="w-full rounded-xl border border-gray-100 bg-white p-3 text-left transition hover:border-indigo-500 hover:shadow-sm disabled:cursor-wait disabled:opacity-60"
+                className="w-full overflow-hidden rounded-xl border border-gray-100 bg-white text-left transition hover:border-indigo-500 hover:shadow-sm disabled:cursor-wait disabled:opacity-60"
               >
+                <img
+                  src={template.previewImage || `/api/website/template/preview?templateId=${encodeURIComponent(template.templateId)}`}
+                  alt={`${template.name} preview`}
+                  loading="lazy"
+                  className="aspect-video w-full object-cover"
+                />
+                <div className="p-3">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-xs font-black text-gray-900">{template.name}</h3>
                   <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold text-gray-500">{template.category}</span>
                 </div>
                 <p className="mt-1 line-clamp-2 text-[10px] leading-relaxed text-gray-500">{template.description}</p>
                 <div className="mt-2 text-[9px] font-mono text-gray-400">{template.templateId}</div>
+                </div>
               </button>
             ))}
             {filteredTemplates.length === 0 && (

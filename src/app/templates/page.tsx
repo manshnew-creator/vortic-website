@@ -75,8 +75,15 @@ export default function TemplatesMarketplacePage() {
                 {items.map((template) => (
                   <article
                     key={template.templateId}
-                    className="group rounded-3xl border border-slate-800 bg-slate-900/55 p-5 shadow-2xl shadow-black/10 transition hover:-translate-y-1 hover:border-indigo-500/60 hover:bg-slate-900"
+                    className="group overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/55 shadow-2xl shadow-black/10 transition hover:-translate-y-1 hover:border-indigo-500/60 hover:bg-slate-900"
                   >
+                    <img
+                      src={`/api/website/template/preview?templateId=${encodeURIComponent(template.templateId)}`}
+                      alt={`${template.name} template preview`}
+                      loading="lazy"
+                      className="aspect-video w-full object-cover"
+                    />
+                    <div className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <h3 className="text-base font-black text-white group-hover:text-indigo-200">{template.name}</h3>
@@ -92,6 +99,7 @@ export default function TemplatesMarketplacePage() {
                       >
                         Use template
                       </a>
+                    </div>
                     </div>
                   </article>
                 ))}

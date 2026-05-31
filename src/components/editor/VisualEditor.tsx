@@ -7,6 +7,7 @@ import { VisualEditorBridge } from './VisualEditorBridge';
 import { RightPanel } from './RightPanel';
 import { PageBuilderSchema } from '../../types/builder';
 import { toast } from '../ui/ToastProvider';
+import { CommandPalette } from './CommandPalette';
 
 // Mock Initial Landing Page Builder Schema
 const MOCK_INITIAL_SCHEMA: PageBuilderSchema = {
@@ -169,10 +170,12 @@ const MOCK_INITIAL_SCHEMA: PageBuilderSchema = {
 
 export const VisualEditor: React.FC = () => {
   const { schema, initSchema, undo, redo, history, historyIndex, hasUnsavedChanges, isSaving, setSaving, markSaved, deleteBlock, setSelectedBlockId } = useEditorStore();
+  const importInputRef = React.useRef<HTMLInputElement>(null);
 
   // ADAPTIVE MOBILE LAYOUT SYSTEM (حل مشكلة تداخل الصفحات والتصميم على الجوال)
   // Allows small/mobile screens to toggle smoothly between active editing views
   const [activeTab, setActiveTab] = useState<'canvas' | 'elements' | 'styles'>('canvas');
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   // Load a requested template from /editor?template=... first; otherwise restore latest local draft.
   useEffect(() => {
@@ -270,6 +273,12 @@ export const VisualEditor: React.FC = () => {
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const modifier = isMac ? e.metaKey : e.ctrlKey;
 
+      if (modifier && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+        return;
+      }
+
       if (modifier && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         if (e.shiftKey) redo();
@@ -294,6 +303,38 @@ export const VisualEditor: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo, deleteBlock, setSelectedBlockId]);
+
+  const handleExportSchema = () => {
+    if (!schema) return;
+    const blob = new Blob([JSON.stringify(schema, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${schema.slug || 'vortic-page'}.schema.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Schema exported', description: 'Your page JSON is ready for backup or migration.', variant: 'success' });
+  };
+
+  const handleImportSchema = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const imported = JSON.parse(await file.text()) as PageBuilderSchema;
+      if (!imported.rootBlockId || !imported.blocks?.[imported.rootBlockId]) throw new Error('Invalid schema');
+      initSchema({ ...imported, pageId: schema?.pageId || imported.pageId || 'landing_page_demo_1' });
+      toast({ title: 'Schema imported', description: imported.title || 'Imported page', variant: 'success' });
+    } catch {
+      toast({ title: 'Invalid schema file', description: 'Please choose a valid Vortic page JSON file.', variant: 'error' });
+    } finally {
+      if (importInputRef.current) importInputRef.current.value = '';
+    }
+  };
+
+  const handleResetDraft = () => {
+    window.localStorage.removeItem('vortic:draft:landing_page_demo_1');
+    initSchema(MOCK_INITIAL_SCHEMA);
+    toast({ title: 'Draft reset', description: 'The starter layout has been restored.', variant: 'info' });
+  };
 
   const handlePublish = async () => {
     if (!schema) return;
@@ -322,8 +363,75 @@ export const VisualEditor: React.FC = () => {
     }
   };
 
+  const commandPaletteCommands = [
+    {
+      id: 'publish',
+      title: 'Publish site',
+      description: 'Queue the current page for publishing.',
+      shortcut: 'Ctrl+P',
+      icon: '🚀',
+      run: () => void handlePublish(),
+    },
+    {
+      id: 'export',
+      title: 'Export schema',
+      description: 'Download this page as a Vortic JSON schema.',
+      shortcut: 'JSON',
+      icon: '📤',
+      run: handleExportSchema,
+    },
+    {
+      id: 'import',
+      title: 'Import schema',
+      description: 'Import a Vortic JSON page schema from your device.',
+      icon: '📥',
+      run: () => importInputRef.current?.click(),
+    },
+    {
+      id: 'reset',
+      title: 'Reset current draft',
+      description: 'Restore the starter page and clear local draft storage.',
+      icon: '♻️',
+      run: handleResetDraft,
+    },
+    {
+      id: 'templates',
+      title: 'Open templates marketplace',
+      description: 'Browse all 165 professional templates.',
+      icon: '🧩',
+      run: () => window.open('/templates', '_blank', 'noopener,noreferrer'),
+    },
+    {
+      id: 'dashboard',
+      title: 'Open dashboard',
+      description: 'Go to the Vortic workspace dashboard.',
+      icon: '📊',
+      run: () => { window.location.href = '/dashboard'; },
+    },
+    {
+      id: 'analytics',
+      title: 'Open analytics',
+      description: 'View conversion and traffic analytics.',
+      icon: '📈',
+      run: () => { window.location.href = '/dashboard/analytics'; },
+    },
+    {
+      id: 'deselect',
+      title: 'Deselect block',
+      description: 'Clear the current canvas selection.',
+      shortcut: 'Esc',
+      icon: '⌫',
+      run: () => setSelectedBlockId(null),
+    },
+  ];
+
   return (
     <div className="w-full h-dvh flex flex-col overflow-hidden bg-slate-950 font-sans text-slate-100">
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        commands={commandPaletteCommands}
+      />
       {/* Top Navbar */}
       <header className="h-14 border-b border-slate-900 bg-slate-950 flex items-center justify-between px-4 z-20">
         <div className="flex items-center space-x-2.5">
@@ -338,6 +446,14 @@ export const VisualEditor: React.FC = () => {
 
         {/* Undo, Redo, Autosave Indicators */}
         <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setIsCommandPaletteOpen(true)}
+            className="hidden sm:inline-flex rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-300 transition hover:bg-slate-800 hover:text-white"
+            title="Command palette (Ctrl/Cmd+K)"
+          >
+            ⌘K
+          </button>
+
           <div className="hidden sm:flex items-center space-x-1 border-r border-slate-800 pr-3">
             <button
               onClick={undo}
@@ -365,6 +481,34 @@ export const VisualEditor: React.FC = () => {
             ) : (
               <span className="text-emerald-400">Saved</span>
             )}
+          </div>
+
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={(event) => handleImportSchema(event.target.files?.[0])}
+          />
+          <div className="hidden md:flex items-center gap-1 border-r border-slate-800 pr-3">
+            <button
+              onClick={handleExportSchema}
+              className="bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition-all uppercase tracking-wider"
+            >
+              Export
+            </button>
+            <button
+              onClick={() => importInputRef.current?.click()}
+              className="bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition-all uppercase tracking-wider"
+            >
+              Import
+            </button>
+            <button
+              onClick={handleResetDraft}
+              className="bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition-all uppercase tracking-wider"
+            >
+              Reset
+            </button>
           </div>
 
           <button

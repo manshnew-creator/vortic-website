@@ -14,7 +14,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      template,
+      template: {
+        ...template,
+        previewImage: `/api/website/template/preview?templateId=${encodeURIComponent(template.templateId)}`,
+      },
     });
   }
 
@@ -23,6 +26,7 @@ export async function GET(req: NextRequest) {
     name: template.name,
     description: template.description,
     category: template.category,
+    previewImage: `/api/website/template/preview?templateId=${encodeURIComponent(template.templateId)}`,
   }));
 
   return NextResponse.json({

@@ -12,6 +12,7 @@ The project is designed for SaaS founders, agencies, creators, ecommerce brands,
 - ✅ Production build passes with TypeScript
 - ✅ `npm audit --omit=dev` reports zero production vulnerabilities
 - ✅ 165 landing page templates registered
+- ✅ Professional dynamic SVG preview image for every template
 - ✅ Visual editor with blocks, styles panel, responsive preview, autosave, publish flow, and template application
 - ✅ Template marketplace available at `/templates`
 - ✅ Multi-tenant routing via `src/proxy.ts`
@@ -102,8 +103,11 @@ Template APIs:
 ```http
 GET /api/website/template
 GET /api/website/template?templateId=ai_startup_os
+GET /api/website/template/preview?templateId=ai_startup_os
 POST /api/website/template
 ```
+
+Every template has a dynamic SVG preview image generated from its name, category, and theme colors. These previews are used in the marketplace and editor template picker.
 
 ---
 

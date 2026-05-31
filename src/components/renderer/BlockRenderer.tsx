@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { PageBuilderSchema } from '../../types/builder';
+import { useEditorStore } from '../../store/editorStore';
 import {
   SectionBlock,
   ContainerBlock,
@@ -35,6 +36,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   isEditorMode = false,
 }) => {
   const block = schema.blocks[blockId];
+  const { viewportMode, updateBlockLayout, moveBlock, duplicateBlock, deleteBlock } = useEditorStore();
   if (!block) return null;
 
   // Enforce visibility rules inside preview/published sites
@@ -67,8 +69,72 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   const wrapInEditorControls = (renderedElement: React.ReactNode) => {
     if (!isEditorMode) return renderedElement;
 
+    const isRoot = blockId === schema.rootBlockId;
+
+    const startResize = (event: React.PointerEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const wrapper = event.currentTarget.parentElement;
+      const rect = wrapper?.getBoundingClientRect();
+      const currentWidth = block.layout.width?.[viewportMode] || block.layout.width?.desktop || '100%';
+      const currentMinHeight = block.layout.minHeight?.[viewportMode] || block.layout.minHeight?.desktop || '';
+      const initialWidth = currentWidth.endsWith('px') ? parseFloat(currentWidth) : (rect?.width || 320);
+      const initialHeight = currentMinHeight.endsWith('px') ? parseFloat(currentMinHeight) : (rect?.height || 120);
+
+      const onMove = (moveEvent: PointerEvent) => {
+        const nextWidth = Math.max(120, Math.round(initialWidth + moveEvent.clientX - startX));
+        const nextHeight = Math.max(48, Math.round(initialHeight + moveEvent.clientY - startY));
+        updateBlockLayout(blockId, {
+          width: { ...(block.layout.width || { desktop: '100%' }), [viewportMode]: `${nextWidth}px` },
+          minHeight: { ...(block.layout.minHeight || { desktop: '0px' }), [viewportMode]: `${nextHeight}px` },
+        });
+      };
+
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    };
+
+    const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
+      if (isRoot) return;
+      event.stopPropagation();
+      event.dataTransfer.setData('application/x-vortic-block', blockId);
+      event.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+      const draggedId = event.dataTransfer.getData('application/x-vortic-block');
+      if (!draggedId || draggedId === blockId) return;
+      event.preventDefault();
+      event.stopPropagation();
+
+      const canContain = ['section', 'container', 'grid', 'form'].includes(block.type);
+      if (canContain) {
+        moveBlock(draggedId, blockId, block.children.length);
+        return;
+      }
+
+      if (block.parentId && schema.blocks[block.parentId]) {
+        const parent = schema.blocks[block.parentId];
+        const targetIndex = parent.children.indexOf(blockId);
+        moveBlock(draggedId, parent.id, Math.max(0, targetIndex));
+      }
+    };
+
     return (
       <div
+        draggable={!isRoot}
+        onDragStart={handleDragStart}
+        onDragOver={(event) => {
+          if (event.dataTransfer.types.includes('application/x-vortic-block')) event.preventDefault();
+        }}
+        onDrop={handleDrop}
         onClick={(e) => {
           e.stopPropagation();
           if (onSelectBlock) onSelectBlock(blockId);
@@ -83,7 +149,22 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         <div className="absolute top-0 left-0 bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-br opacity-0 group-hover/block:opacity-100 transition-opacity z-50 pointer-events-none">
           {block.name}
         </div>
+        {isSelected && !isRoot && (
+          <div className="absolute -top-8 right-0 z-[70] hidden items-center gap-1 rounded-xl border border-slate-800 bg-slate-950/95 p-1 shadow-2xl group-hover/block:flex">
+            <button type="button" onClick={(e) => { e.stopPropagation(); duplicateBlock(blockId); }} className="rounded-lg px-2 py-1 text-[10px] font-black text-slate-300 hover:bg-slate-800 hover:text-white">Duplicate</button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); deleteBlock(blockId); }} className="rounded-lg px-2 py-1 text-[10px] font-black text-rose-300 hover:bg-rose-500/10">Delete</button>
+          </div>
+        )}
         {renderedElement}
+        {isSelected && !isRoot && (
+          <button
+            type="button"
+            onPointerDown={startResize}
+            className="absolute -bottom-2 -right-2 z-[60] h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow-lg cursor-nwse-resize"
+            title="Drag to resize width and height"
+            aria-label="Resize selected block width and height"
+          />
+        )}
       </div>
     );
   };

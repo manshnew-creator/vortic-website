@@ -8,6 +8,7 @@ import { CollaborationPresenceEngine, ClientPresence } from '../../lib/collabora
 import { BlockRenderer } from '../renderer/BlockRenderer';
 import { Sandbox } from '../renderer/Sandbox';
 import { toast } from '../ui/ToastProvider';
+import { LayersPanel } from './LayersPanel';
 
 export const VisualEditorBridge: React.FC = () => {
   const { schema, viewportMode, setViewportMode, selectedBlockId, setSelectedBlockId, updateBlockProps } = useEditorStore();
@@ -19,6 +20,7 @@ export const VisualEditorBridge: React.FC = () => {
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
   const [showShortcutsCheatSheet, setShowShortcutsCheatSheet] = useState(false);
   const [snapEnabled, setSnapEnabled] = useState(true);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   
   const canvasRef = useRef<HTMLDivElement>(null);
   const myUserId = 'user_curr_designer_1';
@@ -134,12 +136,29 @@ export const VisualEditorBridge: React.FC = () => {
           </button>
         </div>
 
-        <div className="text-xs text-gray-400 font-mono">
-          {viewportMode === 'desktop' && '100% Width'}
-          {viewportMode === 'tablet' && '768px (Tablet)'}
-          {viewportMode === 'mobile' && '375px (Mobile)'}
+        <div className="hidden sm:flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsPreviewMode(false)}
+            className={`rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition ${!isPreviewMode ? 'bg-slate-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsPreviewMode(true);
+              setSelectedBlockId(null);
+            }}
+            className={`rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition ${isPreviewMode ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+          >
+            Preview
+          </button>
+          <span className="ml-2 hidden items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 md:flex">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            Live responsive preview
+          </span>
         </div>
-        <div className="w-24"></div>
       </div>
 
       {/* Dynamic Smart Snapping Guideline Overlays */}
@@ -211,6 +230,8 @@ export const VisualEditorBridge: React.FC = () => {
           </button>
         </div>
 
+        <LayersPanel />
+
         {/* Central Workspace Canvas Wrapper */}
         <div 
           ref={canvasRef} 
@@ -238,20 +259,22 @@ export const VisualEditorBridge: React.FC = () => {
                 schema={schema}
                 viewport={viewportMode}
                 selectedBlockId={selectedBlockId}
-                onSelectBlock={setSelectedBlockId}
-                isEditorMode={true}
+                onSelectBlock={isPreviewMode ? undefined : setSelectedBlockId}
+                isEditorMode={!isPreviewMode}
               />
             </div>
 
             {/* Sandbox Widget */}
-            <div className="mt-8 border border-dashed border-purple-200 p-4 rounded-xl bg-purple-50/20">
-              <span className="text-[10px] uppercase font-bold text-purple-600 block mb-2">🛡️ Isolated Capability-Based Sandbox Preview</span>
-              <Sandbox 
-                id="preview_sandbox_widget" 
-                customHtml="<h3 style='color:#7c3aed;'>Safe Sandbox Render</h3><p style='font-size:12px; color:#6b7280;'>Third-party widgets cannot access parent app cookies or storage.</p>"
-                height="80px"
-              />
-            </div>
+            {!isPreviewMode && (
+              <div className="mt-8 border border-dashed border-purple-200 p-4 rounded-xl bg-purple-50/20">
+                <span className="text-[10px] uppercase font-bold text-purple-600 block mb-2">🛡️ Isolated Capability-Based Sandbox Preview</span>
+                <Sandbox 
+                  id="preview_sandbox_widget" 
+                  customHtml="<h3 style='color:#7c3aed;'>Safe Sandbox Render</h3><p style='font-size:12px; color:#6b7280;'>Third-party widgets cannot access parent app cookies or storage.</p>"
+                  height="80px"
+                />
+              </div>
+            )}
           </div>
 
           {/* Keyboard Shortcuts Cheat Sheet Floating Panel */}

@@ -14,6 +14,7 @@ export const RightPanel: React.FC = () => {
     updateBlockSpacing,
     updateBlockTypography,
     updateBlockBorder,
+    updateBlockShadow,
     updateBlockVisibility,
     deleteBlock,
     duplicateBlock,
@@ -49,6 +50,41 @@ export const RightPanel: React.FC = () => {
     const updated = currentVal ? { ...currentVal } : ({} as ResponsiveValue<T>);
     updated[viewportMode] = newValue;
     updateFn(updated);
+  };
+
+  const applyStylePreset = (preset: 'glass' | 'dark-card' | 'gradient' | 'hero' | 'form') => {
+    if (preset === 'glass') {
+      updateBlockLayout(block.id, { backgroundColor: 'rgba(255,255,255,0.08)' });
+      updateBlockBorder(block.id, { borderStyle: 'solid', borderWidth: { desktop: '1px' }, borderColor: 'rgba(255,255,255,0.16)', borderRadius: { desktop: '1.5rem' } });
+      updateBlockShadow(block.id, { boxShadow: '0 24px 80px rgba(15,23,42,0.28)' });
+    }
+
+    if (preset === 'dark-card') {
+      updateBlockLayout(block.id, { backgroundColor: '#0f172a' });
+      updateBlockTypography(block.id, { color: '#f8fafc' });
+      updateBlockBorder(block.id, { borderStyle: 'solid', borderWidth: { desktop: '1px' }, borderColor: '#1e293b', borderRadius: { desktop: '1.5rem' } });
+      updateBlockShadow(block.id, { boxShadow: '0 22px 70px rgba(0,0,0,0.35)' });
+    }
+
+    if (preset === 'gradient') {
+      updateBlockLayout(block.id, { backgroundColor: '#4f46e5' });
+      updateBlockTypography(block.id, { color: '#ffffff', fontWeight: { desktop: '900' } });
+      updateBlockBorder(block.id, { borderRadius: { desktop: '999px' }, borderStyle: 'none' });
+      updateBlockShadow(block.id, { boxShadow: '0 18px 50px rgba(79,70,229,0.42)' });
+    }
+
+    if (preset === 'hero') {
+      updateBlockLayout(block.id, { backgroundColor: '#020617', minHeight: { desktop: '620px', mobile: '520px' } });
+      updateBlockSpacing(block.id, { paddingTop: { desktop: '7rem', mobile: '4rem' }, paddingBottom: { desktop: '7rem', mobile: '4rem' }, paddingLeft: { desktop: '1.5rem' }, paddingRight: { desktop: '1.5rem' } });
+      updateBlockTypography(block.id, { color: '#ffffff', textAlign: { desktop: 'center' } });
+    }
+
+    if (preset === 'form') {
+      updateBlockLayout(block.id, { backgroundColor: '#ffffff', maxWidth: { desktop: '520px' } });
+      updateBlockSpacing(block.id, { paddingTop: { desktop: '2rem' }, paddingBottom: { desktop: '2rem' }, paddingLeft: { desktop: '2rem' }, paddingRight: { desktop: '2rem' } });
+      updateBlockBorder(block.id, { borderRadius: { desktop: '1.5rem' }, borderStyle: 'solid', borderWidth: { desktop: '1px' }, borderColor: '#e5e7eb' });
+      updateBlockShadow(block.id, { boxShadow: '0 24px 80px rgba(15,23,42,0.14)' });
+    }
   };
 
   return (
@@ -226,11 +262,26 @@ export const RightPanel: React.FC = () => {
               <>
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-600 mb-1">Image URL source</label>
+                  {block.props.src && (
+                    <img src={block.props.src} alt={block.props.alt || 'Selected image'} className="mb-2 h-24 w-full rounded-lg object-cover border border-gray-200" />
+                  )}
                   <input
                     type="text"
                     value={block.props.src || ''}
                     onChange={(e) => updateBlockProps(block.id, { src: e.target.value })}
                     className="w-full px-2 py-1.5 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white text-slate-800"
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => updateBlockProps(block.id, { src: String(reader.result), alt: block.props.alt || file.name });
+                      reader.readAsDataURL(file);
+                    }}
+                    className="mt-2 w-full text-[10px] text-gray-500 file:mr-2 file:rounded-md file:border-0 file:bg-blue-50 file:px-2 file:py-1 file:text-[10px] file:font-bold file:text-blue-600"
                   />
                 </div>
                 <div>
@@ -296,6 +347,88 @@ export const RightPanel: React.FC = () => {
               </>
             )}
 
+            {block.type === 'input' && (
+              <>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">Field Label</label>
+                  <input
+                    type="text"
+                    value={block.props.label || ''}
+                    onChange={(e) => updateBlockProps(block.id, { label: e.target.value })}
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md bg-white text-slate-800"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Name</label>
+                    <input
+                      type="text"
+                      value={block.props.name || ''}
+                      onChange={(e) => updateBlockProps(block.id, { name: e.target.value })}
+                      className="w-full px-2 py-1.5 border border-gray-200 rounded-md bg-white text-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Type</label>
+                    <select
+                      value={block.props.inputType || 'text'}
+                      onChange={(e) => updateBlockProps(block.id, { inputType: e.target.value })}
+                      className="w-full px-2 py-1.5 border border-gray-200 rounded-md bg-white text-slate-800"
+                    >
+                      <option value="text">Text</option>
+                      <option value="email">Email</option>
+                      <option value="tel">Phone</option>
+                      <option value="url">URL</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">Placeholder</label>
+                  <input
+                    type="text"
+                    value={block.props.placeholder || ''}
+                    onChange={(e) => updateBlockProps(block.id, { placeholder: e.target.value })}
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md bg-white text-slate-800"
+                  />
+                </div>
+              </>
+            )}
+
+            {block.type === 'textarea' && (
+              <>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">Textarea Label</label>
+                  <input
+                    type="text"
+                    value={block.props.label || ''}
+                    onChange={(e) => updateBlockProps(block.id, { label: e.target.value })}
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md bg-white text-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">Placeholder</label>
+                  <input
+                    type="text"
+                    value={block.props.placeholder || ''}
+                    onChange={(e) => updateBlockProps(block.id, { placeholder: e.target.value })}
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-md bg-white text-slate-800"
+                  />
+                </div>
+              </>
+            )}
+
+            {block.type === 'submit-button' && (
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-600 mb-1">Submit Label</label>
+                <input
+                  type="text"
+                  value={block.props.label || ''}
+                  onChange={(e) => updateBlockProps(block.id, { label: e.target.value })}
+                  className="w-full px-2 py-1.5 border border-gray-200 rounded-md bg-white text-slate-800"
+                />
+              </div>
+            )}
+
             {block.type === 'form' && (
               <>
                 <div>
@@ -341,6 +474,29 @@ export const RightPanel: React.FC = () => {
             {/* Viewport Notice Badge */}
             <div className="bg-yellow-50 text-yellow-700 p-2 rounded border border-yellow-100 text-[10px]">
               ✏️ Styles edited here apply explicitly to <strong>{viewportMode} viewport</strong> resolution layout.
+            </div>
+
+            {/* One-click premium style presets */}
+            <div className="border-b border-gray-100 pb-3">
+              <span className="block font-bold text-[11px] text-gray-600 mb-2">Magic Style Presets</span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  ['glass', 'Glass Panel'],
+                  ['dark-card', 'Dark Card'],
+                  ['gradient', 'Gradient CTA'],
+                  ['hero', 'Hero Section'],
+                  ['form', 'Premium Form'],
+                ].map(([preset, label]) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => applyStylePreset(preset as any)}
+                    className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-[10px] font-black text-slate-700 transition hover:border-blue-500 hover:text-blue-600"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Typography Styles */}

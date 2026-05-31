@@ -39,6 +39,7 @@ interface EditorState {
   pushToHistory: (schema: PageBuilderSchema) => void;
   markSaved: () => void;
   setSaving: (isSaving: boolean) => void;
+  replaceSchema: (schema: PageBuilderSchema) => void;
 }
 
 const cloneSchemaWithStructuralSharing = (schema: PageBuilderSchema, mutatedBlockId?: string): PageBuilderSchema => {
@@ -398,5 +399,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   setSaving: (isSaving) => {
     set({ isSaving });
+  },
+
+  replaceSchema: (schema) => {
+    const { pushToHistory } = get();
+    set({ selectedBlockId: null });
+    pushToHistory(schema);
   },
 }));
